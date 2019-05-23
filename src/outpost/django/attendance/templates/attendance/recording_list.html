@@ -1,0 +1,31 @@
+{% extends 'outpost/base.html' %}
+
+{% block content %}
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>#</th>
+    <th>Recorder</th>
+    <th>Room</th>
+    <th>Date</th>
+    <th>Size</th>
+  </tr>
+</thead>
+<tbody>
+  {% for r in object_list %}
+  <tr>
+    <th scope="row">
+      <a href="{% url 'video:recording:detail' pk=r.pk%}" class="btn btn-primary btn-xs">
+        <span >
+        {{ r.pk }}
+      </a>
+    </th>
+    <td>{{ r.recorder }}</td>
+    <td>{{ r.recorder.room|default:"-" }}</td>
+    <td>{{ r.created }}</td>
+    <td>{{ r.data.size|filesizeformat }}</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+{% endblock %}
