@@ -14,95 +14,176 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('geo', '0018_auto_20170829_0937'),
+        ("geo", "0018_auto_20170829_0937"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Card',
+            name="Card",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('serial', models.CharField(max_length=32)),
-                ('enabled', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("serial", models.CharField(max_length=32)),
+                ("enabled", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Entry',
+            name="Entry",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('registered', models.DateTimeField(auto_now_add=True)),
-                ('assigned', models.DateTimeField(blank=True, null=True)),
-                ('quit', models.DateTimeField(blank=True, null=True)),
-                ('completed', models.DateTimeField(blank=True, null=True)),
-                ('state', django_fsm.FSMField(default='registered', max_length=50)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("registered", models.DateTimeField(auto_now_add=True)),
+                ("assigned", models.DateTimeField(blank=True, null=True)),
+                ("quit", models.DateTimeField(blank=True, null=True)),
+                ("completed", models.DateTimeField(blank=True, null=True)),
+                ("state", django_fsm.FSMField(default="registered", max_length=50)),
             ],
         ),
         migrations.CreateModel(
-            name='Holding',
+            name="Holding",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', django_fsm.FSMField(default='pending', max_length=50)),
-                ('campusonline', models.IntegerField()),
-                ('initiated', models.DateTimeField(blank=True, null=True)),
-                ('finished', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("state", django_fsm.FSMField(default="pending", max_length=50)),
+                ("campusonline", models.IntegerField()),
+                ("initiated", models.DateTimeField(blank=True, null=True)),
+                ("finished", models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Lecturer',
+            name="Lecturer",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('campusonline', models.IntegerField()),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("campusonline", models.IntegerField()),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Student',
+            name="Student",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('matriculation', models.PositiveIntegerField()),
-                ('campusonline', models.IntegerField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("matriculation", models.PositiveIntegerField()),
+                ("campusonline", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='Terminal',
+            name="Terminal",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('enabled', models.BooleanField(default=False)),
-                ('online', models.BooleanField(default=False)),
-                ('hostname', models.CharField(max_length=128)),
-                ('config', django.contrib.postgres.fields.jsonb.JSONField()),
-                ('campusonline', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='geo.Room')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enabled", models.BooleanField(default=False)),
+                ("online", models.BooleanField(default=False)),
+                ("hostname", models.CharField(max_length=128)),
+                ("config", django.contrib.postgres.fields.jsonb.JSONField()),
+                (
+                    "campusonline",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="geo.Room",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='holding',
-            name='lecturer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='attendance.Lecturer'),
+            model_name="holding",
+            name="lecturer",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="attendance.Lecturer"
+            ),
         ),
         migrations.AddField(
-            model_name='holding',
-            name='room',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='geo.Room'),
+            model_name="holding",
+            name="room",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="geo.Room"
+            ),
         ),
         migrations.AddField(
-            model_name='entry',
-            name='holding',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='attendance.Holding'),
+            model_name="entry",
+            name="holding",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="attendance.Holding",
+            ),
         ),
         migrations.AddField(
-            model_name='entry',
-            name='room',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='geo.Room'),
+            model_name="entry",
+            name="room",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="geo.Room",
+            ),
         ),
         migrations.AddField(
-            model_name='entry',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='attendance.Student'),
+            model_name="entry",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="attendance.Student"
+            ),
         ),
         migrations.AddField(
-            model_name='card',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='attendance.Student'),
+            model_name="card",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="attendance.Student"
+            ),
         ),
     ]

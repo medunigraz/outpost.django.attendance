@@ -8,14 +8,32 @@ from ...base.fields import ChoiceArrayField
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0009_auto_20180725_1523'),
-    ]
+    dependencies = [("attendance", "0009_auto_20180725_1523")]
 
     operations = [
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=ChoiceArrayField(base_field=models.CharField(choices=[('outpost.attendance.plugins.DebugTerminalBehaviour', 'Debugger'), ('outpost.attendance.plugins.StatisticsTerminalBehaviour', 'Statistics'), ('outpost.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline')], max_length=256), default=list, size=None),
-        ),
+            model_name="terminal",
+            name="behaviour",
+            field=ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                        (
+                            "outpost.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistics",
+                        ),
+                        (
+                            "outpost.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
+        )
     ]

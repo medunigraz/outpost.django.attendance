@@ -13,148 +13,255 @@ from ...base.fields import ChoiceArrayField
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('campusonline', '0014_stud_lv_anw'),
-        ('attendance', '0006_terminal_behaviour'),
+        ("campusonline", "0014_stud_lv_anw"),
+        ("attendance", "0006_terminal_behaviour"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CampusOnlineEntry',
+            name="CampusOnlineEntry",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assigned', models.DateTimeField(blank=True, null=True)),
-                ('ended', models.DateTimeField(blank=True, null=True)),
-                ('state', django_fsm.FSMField(default='created', max_length=50)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("assigned", models.DateTimeField(blank=True, null=True)),
+                ("ended", models.DateTimeField(blank=True, null=True)),
+                ("state", django_fsm.FSMField(default="created", max_length=50)),
             ],
             options={
-                'ordering': ('incoming__created', 'assigned', 'ended'),
-                'permissions': (('view_campusonlineentry', 'View CAMPUSonline Entry'),),
+                "ordering": ("incoming__created", "assigned", "ended"),
+                "permissions": (("view_campusonlineentry", "View CAMPUSonline Entry"),),
             },
         ),
         migrations.CreateModel(
-            name='CampusOnlineHolding',
+            name="CampusOnlineHolding",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', django_fsm.FSMField(default='pending', max_length=50)),
-                ('initiated', models.DateTimeField(blank=True, null=True)),
-                ('finished', models.DateTimeField(blank=True, null=True)),
-                ('course_group_term', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.CourseGroupTerm')),
-                ('lecturer', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Person')),
-                ('room', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Room')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("state", django_fsm.FSMField(default="pending", max_length=50)),
+                ("initiated", models.DateTimeField(blank=True, null=True)),
+                ("finished", models.DateTimeField(blank=True, null=True)),
+                (
+                    "course_group_term",
+                    models.ForeignKey(
+                        blank=True,
+                        db_constraint=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="campusonline.CourseGroupTerm",
+                    ),
+                ),
+                (
+                    "lecturer",
+                    models.ForeignKey(
+                        blank=True,
+                        db_constraint=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="campusonline.Person",
+                    ),
+                ),
+                (
+                    "room",
+                    models.ForeignKey(
+                        blank=True,
+                        db_constraint=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="campusonline.Room",
+                    ),
+                ),
             ],
             options={
-                'permissions': (('view_campusonlineholding', 'View CAMPUSonline Holding'),),
+                "permissions": (
+                    ("view_campusonlineholding", "View CAMPUSonline Holding"),
+                )
             },
         ),
         migrations.CreateModel(
-            name='Statistics',
+            name="Statistics",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=256)),
-                ('active', django.contrib.postgres.fields.ranges.DateTimeRangeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
+                (
+                    "active",
+                    django.contrib.postgres.fields.ranges.DateTimeRangeField(
+                        blank=True, null=True
+                    ),
+                ),
             ],
             options={
-                'ordering': ('id',),
-                'permissions': (('view_statistics', 'View Statistics'),),
+                "ordering": ("id",),
+                "permissions": (("view_statistics", "View Statistics"),),
             },
         ),
         migrations.CreateModel(
-            name='StatisticsEntry',
+            name="StatisticsEntry",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', django_fsm.FSMField(default='created', max_length=50)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("state", django_fsm.FSMField(default="created", max_length=50)),
             ],
             options={
-                'ordering': ('incoming__created',),
-                'get_latest_by': 'incoming__created',
+                "ordering": ("incoming__created",),
+                "get_latest_by": "incoming__created",
             },
         ),
-        migrations.RemoveField(
-            model_name='holding',
-            name='lecturer',
-        ),
-        migrations.RemoveField(
-            model_name='holding',
-            name='room',
+        migrations.RemoveField(model_name="holding", name="lecturer"),
+        migrations.RemoveField(model_name="holding", name="room"),
+        migrations.AlterModelOptions(
+            name="entry", options={"permissions": (("view_entry", "View Entry"),)}
         ),
         migrations.AlterModelOptions(
-            name='entry',
-            options={'permissions': (('view_entry', 'View Entry'),)},
-        ),
-        migrations.AlterModelOptions(
-            name='terminal',
-            options={'ordering': ('id',), 'permissions': (('view_terminal', 'View Terminal'),)},
+            name="terminal",
+            options={
+                "ordering": ("id",),
+                "permissions": (("view_terminal", "View Terminal"),),
+            },
         ),
         migrations.RenameField(
-            model_name='entry',
-            old_name='registered',
-            new_name='created',
+            model_name="entry", old_name="registered", new_name="created"
         ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='holding',
-        ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='room',
-        ),
+        migrations.RemoveField(model_name="entry", name="holding"),
+        migrations.RemoveField(model_name="entry", name="room"),
         migrations.AddField(
-            model_name='entry',
-            name='status',
+            model_name="entry",
+            name="status",
             field=django.contrib.postgres.fields.jsonb.JSONField(default={}),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='entry',
-            name='terminal',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='attendance.Terminal'),
+            model_name="entry",
+            name="terminal",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="attendance.Terminal",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistics'), ('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistics",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
-        migrations.DeleteModel(
-            name='Holding',
+        migrations.DeleteModel(name="Holding"),
+        migrations.AddField(
+            model_name="statisticsentry",
+            name="incoming",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="attendance.Entry",
+            ),
         ),
         migrations.AddField(
-            model_name='statisticsentry',
-            name='incoming',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='attendance.Entry'),
+            model_name="statisticsentry",
+            name="outgoing",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="attendance.Entry",
+            ),
         ),
         migrations.AddField(
-            model_name='statisticsentry',
-            name='outgoing',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='attendance.Entry'),
+            model_name="statisticsentry",
+            name="statistics",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="entries",
+                to="attendance.Statistics",
+            ),
         ),
         migrations.AddField(
-            model_name='statisticsentry',
-            name='statistics',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='entries', to='attendance.Statistics'),
+            model_name="statistics",
+            name="terminals",
+            field=models.ManyToManyField(to="attendance.Terminal"),
         ),
         migrations.AddField(
-            model_name='statistics',
-            name='terminals',
-            field=models.ManyToManyField(to='attendance.Terminal'),
+            model_name="campusonlineentry",
+            name="holding",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="attendance.CampusOnlineHolding",
+            ),
         ),
         migrations.AddField(
-            model_name='campusonlineentry',
-            name='holding',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='attendance.CampusOnlineHolding'),
+            model_name="campusonlineentry",
+            name="incoming",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="attendance.Entry",
+            ),
         ),
         migrations.AddField(
-            model_name='campusonlineentry',
-            name='incoming',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='attendance.Entry'),
-        ),
-        migrations.AddField(
-            model_name='campusonlineentry',
-            name='outgoing',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='attendance.Entry'),
+            model_name="campusonlineentry",
+            name="outgoing",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="attendance.Entry",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='statisticsentry',
-            unique_together=set([('statistics', 'incoming')]),
+            name="statisticsentry", unique_together=set([("statistics", "incoming")])
         ),
     ]

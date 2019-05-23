@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0004_auto_20170929_0858'),
-    ]
+    dependencies = [("attendance", "0004_auto_20170929_0858")]
 
     operations = [
         migrations.AlterField(
-            model_name='terminal',
-            name='enabled',
+            model_name="terminal",
+            name="enabled",
             field=models.BooleanField(default=True),
-        ),
+        )
     ]

@@ -7,18 +7,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0003_auto_20170928_1036'),
-    ]
+    dependencies = [("attendance", "0003_auto_20170928_1036")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='entry',
-            options={'ordering': ('registered',)},
+            name="entry", options={"ordering": ("registered",)}
         ),
         migrations.AddField(
-            model_name='entry',
-            name='autoend',
-            field=models.BooleanField(default=False),
+            model_name="entry", name="autoend", field=models.BooleanField(default=False)
         ),
     ]

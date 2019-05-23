@@ -10,55 +10,68 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('campusonline', '0009_course_coursegroup_coursegroupterm_student'),
-        ('attendance', '0001_initial'),
+        ("campusonline", "0009_course_coursegroup_coursegroupterm_student"),
+        ("attendance", "0001_initial"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='card',
-            name='student',
-        ),
-        migrations.RemoveField(
-            model_name='lecturer',
-            name='user',
-        ),
-        migrations.RemoveField(
-            model_name='terminal',
-            name='campusonline',
-        ),
+        migrations.RemoveField(model_name="card", name="student"),
+        migrations.RemoveField(model_name="lecturer", name="user"),
+        migrations.RemoveField(model_name="terminal", name="campusonline"),
         migrations.AddField(
-            model_name='terminal',
-            name='room',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Room'),
+            model_name="terminal",
+            name="room",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="campusonline.Room",
+            ),
         ),
         migrations.AlterField(
-            model_name='entry',
-            name='room',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Room'),
+            model_name="entry",
+            name="room",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="campusonline.Room",
+            ),
         ),
         migrations.AlterField(
-            model_name='entry',
-            name='student',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Student'),
+            model_name="entry",
+            name="student",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="campusonline.Student",
+            ),
         ),
         migrations.AlterField(
-            model_name='holding',
-            name='lecturer',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Person'),
+            model_name="holding",
+            name="lecturer",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="campusonline.Person",
+            ),
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='config',
+            model_name="terminal",
+            name="config",
             field=django.contrib.postgres.fields.jsonb.JSONField(null=True),
         ),
-        migrations.DeleteModel(
-            name='Card',
-        ),
-        migrations.DeleteModel(
-            name='Lecturer',
-        ),
-        migrations.DeleteModel(
-            name='Student',
-        ),
+        migrations.DeleteModel(name="Card"),
+        migrations.DeleteModel(name="Lecturer"),
+        migrations.DeleteModel(name="Student"),
     ]

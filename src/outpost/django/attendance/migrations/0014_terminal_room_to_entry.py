@@ -6,7 +6,7 @@ from django.db import migrations
 
 
 def assign_room(apps, schema_editor):
-    Entry = apps.get_model('attendance', 'Entry')
+    Entry = apps.get_model("attendance", "Entry")
     for entry in Entry.objects.all():
         entry.room_id = entry.terminal.room_id
         entry.save()
@@ -14,10 +14,6 @@ def assign_room(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0013_auto_20190306_1639'),
-    ]
+    dependencies = [("attendance", "0013_auto_20190306_1639")]
 
-    operations = [
-        migrations.RunPython(assign_room),
-    ]
+    operations = [migrations.RunPython(assign_room)]

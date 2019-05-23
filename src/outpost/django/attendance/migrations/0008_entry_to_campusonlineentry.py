@@ -6,12 +6,10 @@ from django.db import migrations
 
 
 def convert_entries(apps, schema_editor):
-    Entry = apps.get_model('attendance', 'Entry')
-    CampusOnlineEntry = apps.get_model('attendance', 'CampusOnlineEntry')
+    Entry = apps.get_model("attendance", "Entry")
+    CampusOnlineEntry = apps.get_model("attendance", "CampusOnlineEntry")
     for e in Entry.objects.all():
-        coe = CampusOnlineEntry(
-            incoming=e
-        )
+        coe = CampusOnlineEntry(incoming=e)
         coe.state = e.state
         coe.ended = e.quit
         coe.save()
@@ -19,13 +17,8 @@ def convert_entries(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0007_auto_20180725_1517'),
-    ]
+    dependencies = [("attendance", "0007_auto_20180725_1517")]
 
     operations = [
-        migrations.RunPython(
-            convert_entries,
-            reverse_code=migrations.RunPython.noop
-        ),
+        migrations.RunPython(convert_entries, reverse_code=migrations.RunPython.noop)
     ]

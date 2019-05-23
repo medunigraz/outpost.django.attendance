@@ -8,14 +8,14 @@ from ...base.fields import ChoiceArrayField
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0005_auto_20171002_1450'),
-    ]
+    dependencies = [("attendance", "0005_auto_20171002_1450")]
 
     operations = [
         migrations.AddField(
-            model_name='terminal',
-            name='behaviour',
-            field=ChoiceArrayField(base_field=models.CharField(max_length=256), default=list, size=None),
-        ),
+            model_name="terminal",
+            name="behaviour",
+            field=ChoiceArrayField(
+                base_field=models.CharField(max_length=256), default=list, size=None
+            ),
+        )
     ]

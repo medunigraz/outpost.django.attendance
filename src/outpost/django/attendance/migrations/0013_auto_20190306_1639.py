@@ -10,26 +10,58 @@ import outpost.django.base.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('campusonline', '0044_auto_20190225_1708'),
-        ('attendance', '0012_auto_20190226_0959'),
+        ("campusonline", "0044_auto_20190225_1708"),
+        ("attendance", "0012_auto_20190226_0959"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='entry',
-            name='room',
-            field=models.ForeignKey(db_constraint=False, default=1, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='campusonline.Room'),
+            model_name="entry",
+            name="room",
+            field=models.ForeignKey(
+                db_constraint=False,
+                default=1,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="campusonline.Room",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='entry',
-            name='student',
-            field=models.ForeignKey(db_constraint=False, default=1, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='campusonline.Student'),
+            model_name="entry",
+            name="student",
+            field=models.ForeignKey(
+                db_constraint=False,
+                default=1,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="campusonline.Student",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=outpost.django.base.fields.ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistiken'), ('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=outpost.django.base.fields.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistiken",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
     ]

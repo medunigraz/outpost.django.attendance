@@ -8,34 +8,37 @@ from ...base.fields import ChoiceArrayField
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0008_entry_to_campusonlineentry'),
-    ]
+    dependencies = [("attendance", "0008_entry_to_campusonlineentry")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='entry',
-            name='assigned',
-        ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='autoend',
-        ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='completed',
-        ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='quit',
-        ),
-        migrations.RemoveField(
-            model_name='entry',
-            name='state',
-        ),
+        migrations.RemoveField(model_name="entry", name="assigned"),
+        migrations.RemoveField(model_name="entry", name="autoend"),
+        migrations.RemoveField(model_name="entry", name="completed"),
+        migrations.RemoveField(model_name="entry", name="quit"),
+        migrations.RemoveField(model_name="entry", name="state"),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=ChoiceArrayField(base_field=models.CharField(choices=[('outpost.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.attendance.plugins.StatisticsTerminalBehaviour', 'Statistics'), ('outpost.attendance.plugins.DebugTerminalBehaviour', 'Debugger')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistics",
+                        ),
+                        (
+                            "outpost.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
     ]

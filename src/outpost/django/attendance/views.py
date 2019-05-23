@@ -4,9 +4,9 @@ from outpost.django.campusonline import models as co
 
 
 class HoldingView(TemplateView):
-    template_name = 'attendance/holding.html'
+    template_name = "attendance/holding.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['room'] = co.Room.objects.get(pk=self.kwargs['room'])
+        context["room"] = co.Room.objects.get(pk=self.kwargs["room"])
         return context

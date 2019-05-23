@@ -9,23 +9,42 @@ import outpost.django.base.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('campusonline', '0044_auto_20190225_1708'),
-        ('attendance', '0014_terminal_room_to_entry'),
+        ("campusonline", "0044_auto_20190225_1708"),
+        ("attendance", "0014_terminal_room_to_entry"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='terminal',
-            name='room',
-        ),
+        migrations.RemoveField(model_name="terminal", name="room"),
         migrations.AddField(
-            model_name='terminal',
-            name='rooms',
-            field=models.ManyToManyField(db_constraint=False, related_name='terminals', to='campusonline.Room'),
+            model_name="terminal",
+            name="rooms",
+            field=models.ManyToManyField(
+                db_constraint=False, related_name="terminals", to="campusonline.Room"
+            ),
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=outpost.django.base.fields.ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger'), ('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistiken')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=outpost.django.base.fields.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistiken",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
     ]

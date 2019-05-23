@@ -1,29 +1,17 @@
 from . import api
 
 v1 = [
+    (r"attendance/terminal", api.TerminalViewSet, "attendance-terminal"),
+    (r"attendance/clock", api.ClockViewSet, "attendance-clock"),
     (
-        r'attendance/terminal',
-        api.TerminalViewSet,
-        'attendance-terminal'
-    ),
-    (
-        r'attendance/clock',
-        api.ClockViewSet,
-        'attendance-clock'
-    ),
-    (
-        r'attendance/campusonlineholding',
+        r"attendance/campusonlineholding",
         api.CampusOnlineHoldingViewSet,
-        'attendance-campusonline-holding'
+        "attendance-campusonline-holding",
     ),
     (
-        r'attendance/campusonlineentry',
+        r"attendance/campusonlineentry",
         api.CampusOnlineEntryViewSet,
-        'attendance-campusonline-entry'
+        "attendance-campusonline-entry",
     ),
-    (
-        r'attendance/statistics',
-        api.StatisticsViewSet,
-        'attendance-statistics'
-    ),
+    (r"attendance/statistics", api.StatisticsViewSet, "attendance-statistics"),
 ]

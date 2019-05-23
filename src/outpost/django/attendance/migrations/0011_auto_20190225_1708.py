@@ -10,42 +10,89 @@ import outpost.django.base.fields
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0010_auto_20180828_1057'),
-    ]
+    dependencies = [("attendance", "0010_auto_20180828_1057")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='campusonlineholding',
-            options={'get_latest_by': 'initiated', 'permissions': (('view_campusonlineholding', 'View CAMPUSonline Holding'),)},
+            name="campusonlineholding",
+            options={
+                "get_latest_by": "initiated",
+                "permissions": (
+                    ("view_campusonlineholding", "View CAMPUSonline Holding"),
+                ),
+            },
         ),
         migrations.AlterModelOptions(
-            name='entry',
-            options={'get_latest_by': 'created', 'permissions': (('view_entry', 'View Entry'),)},
+            name="entry",
+            options={
+                "get_latest_by": "created",
+                "permissions": (("view_entry", "View Entry"),),
+            },
         ),
         migrations.AlterField(
-            model_name='campusonlineholding',
-            name='course_group_term',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='campusonline.CourseGroupTerm'),
+            model_name="campusonlineholding",
+            name="course_group_term",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="campusonline.CourseGroupTerm",
+            ),
         ),
         migrations.AlterField(
-            model_name='campusonlineholding',
-            name='lecturer',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='campusonline.Person'),
+            model_name="campusonlineholding",
+            name="lecturer",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="campusonline.Person",
+            ),
         ),
         migrations.AlterField(
-            model_name='campusonlineholding',
-            name='room',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='campusonline.Room'),
+            model_name="campusonlineholding",
+            name="room",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="campusonline.Room",
+            ),
         ),
         migrations.AlterField(
-            model_name='entry',
-            name='status',
+            model_name="entry",
+            name="status",
             field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=outpost.django.base.fields.ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistics')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=outpost.django.base.fields.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistics",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
     ]

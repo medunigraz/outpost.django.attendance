@@ -8,14 +8,19 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0002_auto_20170928_1031'),
-    ]
+    dependencies = [("attendance", "0002_auto_20170928_1031")]
 
     operations = [
         migrations.AlterField(
-            model_name='holding',
-            name='room',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='campusonline.Room'),
-        ),
+            model_name="holding",
+            name="room",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="campusonline.Room",
+            ),
+        )
     ]
