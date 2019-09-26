@@ -25,47 +25,6 @@ class TerminalViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     permit_list_expands = ("rooms",)
 
 
-class ClockViewSet(viewsets.ViewSet):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def create(self, request):
-        terminal_id = request.data.get("terminal")
-        logger.debug(f"Incoming request for terminal {terminal_id}")
-        try:
-            terminal = models.Terminal.objects.get(
-                pk=terminal_id, online=True, enabled=True
-            )
-        except models.Terminal.DoesNotExist:
-            logger.warn(f"Unknown terminal {terminal_id}")
-            raise exceptions.NotFound("Unknown terminal identification")
-        room_id = request.data.get("room")
-        try:
-            room = terminal.rooms.get(pk=room_id)
-        except terminal.rooms.DoesNotExist:
-            logger.warn(f"Unknown room {room_id}")
-            raise exceptions.NotFound("Unknown room identification")
-        card_id = request.data.get("cardid", None)
-        if not card_id:
-            logger.warn(f"Missing card id")
-            raise exceptions.ValidationError("Missing card information")
-        try:
-            student = co.Student.objects.get(cardid=card_id)
-        except co.Student.DoesNotExist:
-            logger.warn(f"No student found for cardid {card_id}")
-            raise exceptions.NotFound("Unknown student identification")
-        entry = models.Entry.objects.create(
-            student=student, terminal=terminal, room=room
-        )
-        return Response(
-            {
-                "status": entry.status,
-                "name": str(student),
-                "entry": entry.pk,
-                "room": room,
-            }
-        )
-
-
 class CampusOnlineHoldingViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     queryset = models.CampusOnlineHolding.objects.all()
     serializer_class = serializers.CampusOnlineHoldingSerializer

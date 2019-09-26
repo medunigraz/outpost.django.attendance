@@ -46,33 +46,16 @@ class Terminal(NetworkedDeviceMixin, models.Model):
         return self.hostname
 
 
-@signal_connect
 class Entry(models.Model):
     terminal = models.ForeignKey("Terminal")
     created = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(
         "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="+"
     )
-    room = models.ForeignKey(
-        "campusonline.Room", models.DO_NOTHING, db_constraint=False, related_name="+"
-    )
-    status = JSONField(default=list)
 
     class Meta:
         get_latest_by = "created"
         permissions = (("view_entry", _("View Entry")),)
-
-    def post_save(self, *args, **kwargs):
-        if getattr(self, "_post_save", False):
-            return
-        setattr(self, "_post_save", True)
-        if kwargs.get("created", False):
-            hook = self.terminal.plugins.hook.create
-        else:
-            hook = self.terminal.plugins.hook.update
-        self.status = hook(entry=self)
-        self.save()
-        setattr(self, "_post_save", False)
 
     def __str__(s):
         return f"{s.student} [{s.created}: {s.terminal}]"
@@ -199,6 +182,14 @@ class CampusOnlineEntry(models.Model):
         null=True,
         blank=True,
         related_name="entries",
+    )
+    room = models.ForeignKey(
+        "campusonline.Room",
+        models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        blank=True,
+        related_name="+",
     )
     state = FSMField(default="created")
 

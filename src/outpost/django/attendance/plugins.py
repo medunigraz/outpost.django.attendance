@@ -27,16 +27,17 @@ class TerminalBehaviour(object):
         pm.add_hookspecs(cls)
         for plugin in cls.base.all():
             if condition(plugin):
+                logger.info(f"Registering plugin: {plugin}")
                 pm.register(plugin())
         return pm
 
     @hookspec
-    def create(self, entry) -> List[str]:
+    def preflight(self, terminal, student) -> List[dict]:
         """
         """
 
     @hookspec
-    def update(self, entry) -> List[str]:
+    def clock(self, entry, payload) -> List[str]:
         """
         """
 
@@ -46,12 +47,14 @@ class DebugTerminalBehaviour(TerminalBehaviourPlugin):
     name = _("Debugger")
 
     @TerminalBehaviour.hookimpl
-    def create(self, entry):
-        logger.debug(f"{self.__class__.__name__}: create({entry})")
+    def preflight(self, terminal, student):
+        logger.debug(f"{self.__class__.__name__}: preflight({terminal}, {student})")
+        return {"id": f"{self.__class__.__name__}:preflight"}
 
     @TerminalBehaviour.hookimpl
-    def update(self, entry):
-        logger.debug(f"{self.__class__.__name__}: update({entry})")
+    def clock(self, entry, payload):
+        logger.debug(f"{self.__class__.__name__}: clock({entry}, {payload})")
+        return {"id": f"{self.__class__.__name__}:clock"}
 
 
 class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
@@ -59,48 +62,75 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
     name = _("CAMPUSonline")
 
     @TerminalBehaviour.hookimpl
-    def create(self, entry):
+    def preflight(self, terminal, student):
+        from .models import CampusOnlineEntry
+
+        # import pudb ; pu.db
+        if terminal.rooms.count() < 2:
+            return
+        try:
+            coe = CampusOnlineEntry.objects.get(
+                incoming__student=student, ended__isnull=True
+            )
+            logger.debug(f"Outgoing clock in: {coe}")
+            return
+        except CampusOnlineEntry.DoesNotExist:
+            pass
+        return {
+            "id": f"{self.__class__.__name__}:room",
+            "question": _("Please select room"),
+            "options": {r.pk: str(r) for r in terminal.rooms.all()},
+        }
+
+    @TerminalBehaviour.hookimpl
+    def clock(self, entry, payload):
         from .models import CampusOnlineHolding, CampusOnlineEntry
 
+        # import pudb ; pu.db
         logger.debug(f"{self.__class__.__name__}: create({entry})")
+        room_count = entry.terminal.rooms.count()
+        if room_count == 0:
+            logger.warn(f"Terminal {entry.incoming.terminal} has no rooms assigned!")
+            return
+        elif room_count == 1:
+            room = entry.terminal.rooms.first()
+        else:
+            room = entry.terminal.rooms.get(pk=payload.get("room"))
         coe, created = CampusOnlineEntry.objects.get_or_create(
             incoming__student=entry.student,
-            incoming__room=entry.room,
             ended__isnull=True,
-            defaults={"incoming": entry},
+            defaults={"incoming": entry, "room": room},
         )
         if created:
             # New entry, student entering the room
-            logger.debug(f"Student {entry.student} entering {entry.room}")
+            logger.debug(f"Student {entry.student} entering {room}")
             try:
                 holding = CampusOnlineHolding.objects.get(
-                    room=entry.room, initiated__lte=timezone.now(), state="running"
+                    room=room, initiated__lte=timezone.now(), state="running"
                 )
                 coe.assign(holding)
                 msg = _(
-                    "Welcome {coe.incoming.student.display} to "
-                    "{coe.holding.course_group_term.coursegroup}"
+                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}"
                 )
             except CampusOnlineHolding.DoesNotExist:
                 logger.debug(f"No active holding found for {coe}")
                 msg = _("Welcome {coe.incoming.student.display}")
         else:
             # Existing entry, student leaving room
-            logger.debug(f"Student {entry.student} leaving {entry.room}")
+            logger.debug(f"Student {entry.student} leaving {room}")
             if not coe.holding:
                 # No holding but prior entry found, assume he/she left the room
                 # with this entry
-                logger.debug(f"{entry.student} canceling {entry.room}")
+                logger.debug(f"{entry.student} canceling {room}")
                 coe.cancel(entry)
                 msg = _("Goodbye")
             else:
                 # Holding is present and student should be assigned to it
                 if coe.holding.state == "running" and coe.state == "assigned":
-                    logger.debug(f"{entry.student} leaving {entry.room}")
+                    logger.debug(f"{entry.student} leaving {room}")
                     coe.leave(entry)
                 msg = _(
-                    "Thank you for attending "
-                    "{coe.holding.course_group_term.coursegroup}"
+                    f"Thank you for attending {coe.holding.course_group_term.coursegroup}"
                 )
         coe.save()
         return msg.format(coe=coe)
@@ -111,7 +141,7 @@ class StatisticsTerminalBehaviour(TerminalBehaviourPlugin):
     name = _("Statistics")
 
     @TerminalBehaviour.hookimpl
-    def create(self, entry):
+    def clock(self, entry, payload):
         from .models import StatisticsEntry
 
         logger.debug(f"{self.__class__.__name__}: create({entry})")

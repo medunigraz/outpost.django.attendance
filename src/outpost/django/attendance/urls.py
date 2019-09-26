@@ -2,4 +2,10 @@ from django.conf.urls import include, url
 
 from . import views
 
-urlpatterns = [url(r"^(?P<room>[\w\d\.]+)/$", views.HoldingView.as_view())]
+urlpatterns = [
+    url(
+        r"^(?P<terminal_id>\d+)/(?P<card_id>[\dA-F]{8})/$",
+        views.ClockView.as_view(),
+        name="input",
+    )
+]
