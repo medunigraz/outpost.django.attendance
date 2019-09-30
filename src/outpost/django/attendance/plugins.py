@@ -95,7 +95,11 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
         elif room_count == 1:
             room = entry.terminal.rooms.first()
         else:
-            room = entry.terminal.rooms.get(pk=payload.get("room"))
+            room_id = payload.get(f"{self.__class__.__name__}:room")
+            try:
+                room = entry.terminal.rooms.get(pk=room_id)
+            except entry.terminal.rooms.DoesNotExist:
+                return
         coe, created = CampusOnlineEntry.objects.get_or_create(
             incoming__student=entry.student,
             ended__isnull=True,
