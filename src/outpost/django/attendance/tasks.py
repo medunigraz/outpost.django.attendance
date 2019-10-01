@@ -6,9 +6,6 @@ from celery.task.schedules import crontab
 from django.db.models import Q
 from django.utils import timezone
 
-from outpost.campusonline.models import Student
-
-from .models import CampusOnlineEntry, CampusOnlineHolding, Entry, Terminal
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +14,9 @@ class EntryCleanupTask(PeriodicTask):
     run_every = timedelta(minutes=15)
 
     def run(self, **kwargs):
+        from outpost.django.campusonline.models import Student
+        from .models import Entry
+
         for e in Entry.objects.all():
             try:
                 Student.objects.get(pk=e.student_id)
@@ -33,6 +33,8 @@ class CampusOnlineEntryCleanupTask(PeriodicTask):
     run_every = timedelta(minutes=5)
 
     def run(self, **kwargs):
+        from .models import CampusOnlineEntry
+
         past = timezone.now() - timedelta(hours=12)
         cond = {"state": "created", "incoming__created__lt": past}
         for e in CampusOnlineEntry.objects.filter(**cond):
@@ -44,6 +46,8 @@ class CampusOnlineHoldingCleanupTask(PeriodicTask):
     run_every = timedelta(minutes=5)
 
     def run(self, **kwargs):
+        from .models import CampusOnlineHolding
+
         now = timezone.now()
         # TODO: Fix filter to find holding that have recently ended
         for h in CampusOnlineHolding.objects.filter(state="running"):
