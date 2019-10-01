@@ -36,8 +36,10 @@ class CampusOnlineEntryCleanupTask(PeriodicTask):
         from .models import CampusOnlineEntry
 
         past = timezone.now() - timedelta(hours=12)
+        logger.info(f"Cleaning up CO entries older than {past}")
         cond = {"state": "created", "incoming__created__lt": past}
         for e in CampusOnlineEntry.objects.filter(**cond):
+            logger.debug(f"Canceling CO entry {e}")
             e.cancel()
             e.save()
 
