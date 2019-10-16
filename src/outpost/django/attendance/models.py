@@ -50,7 +50,10 @@ class Entry(models.Model):
     terminal = models.ForeignKey("Terminal")
     created = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(
-        "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="+"
+        "campusonline.Student",
+        models.DO_NOTHING,
+        db_constraint=False,
+        related_name="attendance",
     )
 
     class Meta:
