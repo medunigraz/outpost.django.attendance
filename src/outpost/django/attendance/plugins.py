@@ -2,8 +2,10 @@ import logging
 from typing import List
 
 import pluggy
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from rest_framework.exceptions import NotFound
 
 from outpost.django.base.plugins import Plugin
 
@@ -88,25 +90,50 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
 
         # import pudb ; pu.db
         logger.debug(f"{self.__class__.__name__}: create({entry})")
-        room_count = entry.terminal.rooms.count()
-        if room_count == 0:
-            logger.warn(f"Terminal {entry.incoming.terminal} has no rooms assigned!")
-            return
-        elif room_count == 1:
-            room = entry.terminal.rooms.first()
-        else:
-            room_id = payload.get(f"{self.__class__.__name__}:room")
-            try:
-                room = entry.terminal.rooms.get(pk=room_id)
-            except entry.terminal.rooms.DoesNotExist:
-                return
-        coe, created = CampusOnlineEntry.objects.get_or_create(
-            incoming__student=entry.student,
-            ended__isnull=True,
-            defaults={"incoming": entry, "room": room},
-        )
-        if created:
+        try:
+            coe = CampusOnlineEntry.objects.get(
+                incoming__student=entry.student, ended__isnull=True
+            )
+            # Existing entry, student leaving room
+            logger.debug(f"Student {entry.student} leaving {coe.room}")
+            if not coe.holding:
+                # No holding but prior entry found, assume he/she left the room
+                # with this entry
+                logger.debug(f"{entry.student} canceling {coe.room}")
+                coe.cancel(entry)
+                msg = _("Goodbye")
+            else:
+                try:
+                    # Holding is present and student should be assigned to it
+                    if coe.holding.state == "running" and coe.state == "assigned":
+                        logger.debug(f"{entry.student} leaving {coe.room}")
+                        coe.leave(entry)
+                    msg = _(
+                        f"Thank you for attending {coe.holding.course_group_term.coursegroup}"
+                    )
+                except ObjectDoesNotExist as e:
+                    logger.warn(f"Inconsitent holding found for entry {coe}: {e}")
+                    msg = _("Goodbye")
+        except CampusOnlineEntry.DoesNotExist:
             # New entry, student entering the room
+            room_count = entry.terminal.rooms.count()
+            if room_count == 0:
+                logger.warn(
+                    f"Terminal {entry.incoming.terminal} has no rooms assigned."
+                )
+                raise NotFound(_(f"Terminal has no suiteable rooms assigned."))
+            elif room_count == 1:
+                room = entry.terminal.rooms.first()
+            else:
+                room_id = payload.get(f"{self.__class__.__name__}:room")
+                try:
+                    room = entry.terminal.rooms.get(pk=room_id)
+                except entry.terminal.rooms.DoesNotExist:
+                    logger.warn(
+                        f"Terminal {entry.incoming.terminal} has no room with PK {room_id} assigned."
+                    )
+                    raise NotFound(_(f"No such room found for terminal."))
+            coe = CampusOnlineEntry.objects.create(incoming=entry, room=room)
             logger.debug(f"Student {entry.student} entering {room}")
             try:
                 holding = CampusOnlineHolding.objects.get(
@@ -119,23 +146,6 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
             except CampusOnlineHolding.DoesNotExist:
                 logger.debug(f"No active holding found for {coe}")
                 msg = _("Welcome {coe.incoming.student.display}")
-        else:
-            # Existing entry, student leaving room
-            logger.debug(f"Student {entry.student} leaving {room}")
-            if not coe.holding:
-                # No holding but prior entry found, assume he/she left the room
-                # with this entry
-                logger.debug(f"{entry.student} canceling {room}")
-                coe.cancel(entry)
-                msg = _("Goodbye")
-            else:
-                # Holding is present and student should be assigned to it
-                if coe.holding.state == "running" and coe.state == "assigned":
-                    logger.debug(f"{entry.student} leaving {room}")
-                    coe.leave(entry)
-                msg = _(
-                    f"Thank you for attending {coe.holding.course_group_term.coursegroup}"
-                )
         coe.save()
         return msg.format(coe=coe)
 
