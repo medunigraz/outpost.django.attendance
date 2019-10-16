@@ -173,7 +173,9 @@ class CampusOnlineHolding(models.Model):
 
 
 class CampusOnlineEntry(models.Model):
-    incoming = models.ForeignKey("Entry", models.CASCADE, related_name="campusonlineentry")
+    incoming = models.ForeignKey(
+        "Entry", models.CASCADE, related_name="campusonlineentry"
+    )
     outgoing = models.ForeignKey(
         "Entry", models.CASCADE, null=True, blank=True, related_name="+"
     )
