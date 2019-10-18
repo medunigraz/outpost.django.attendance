@@ -2,7 +2,6 @@ from . import api
 
 v1 = [
     (r"attendance/terminal", api.TerminalViewSet, "attendance-terminal"),
-    (r"attendance/clock", api.ClockViewSet, "attendance-clock"),
     (
         r"attendance/campusonlineholding",
         api.CampusOnlineHoldingViewSet,
