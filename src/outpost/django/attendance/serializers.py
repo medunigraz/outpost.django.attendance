@@ -28,15 +28,29 @@ class EntrySerializer(serializers.ModelSerializer):
 
 
 class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
+    """
+    ## Expansions
+
+    To activate relation expansion add the desired fields as a comma separated
+    list to the `expand` query parameter like this:
+
+        ?expand=<field>,<field>,<field>,...
+
+    The following relational fields can be expanded:
+
+     * `course_group_term`
+     * `entries`
+
+    """
 
     expandable_fields = {
         "course_group_term": (
-            f"outpost.django.campusonline.serializers.CampusOnlineEntrySerializer",
+            f"outpost.django.campusonline.serializers.CourseGroupTermSerializer",
             {"source": "course_group_term", "read_only": True},
         ),
         "entries": (
             f"{__package__}.CampusOnlineEntrySerializer",
-            {"source": "holding", "read_only": True, "many": True},
+            {"source": "entries", "read_only": True, "many": True},
         ),
     }
 
@@ -72,6 +86,20 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
 
 
 class CampusOnlineEntrySerializer(FlexFieldsModelSerializer):
+    """
+    ## Expansions
+
+    To activate relation expansion add the desired fields as a comma separated
+    list to the `expand` query parameter like this:
+
+        ?expand=<field>,<field>,<field>,...
+
+    The following relational fields can be expanded:
+
+     * `holding`
+     * `student`
+
+    """
 
     student = serializers.PrimaryKeyRelatedField(
         source="incoming.student", read_only=True
