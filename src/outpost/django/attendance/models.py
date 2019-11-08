@@ -113,7 +113,7 @@ class CampusOnlineHolding(models.Model):
     def start(self):
         self.initiated = timezone.now()
         coes = CampusOnlineEntry.objects.filter(
-            incoming__room=self.room, holding=None, state="created"
+            room=self.room, holding=None, state="created"
         )
         for coe in coes:
             coe.assign(self)
