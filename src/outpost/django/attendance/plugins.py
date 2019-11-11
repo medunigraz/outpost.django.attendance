@@ -121,7 +121,7 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                 logger.warn(
                     f"Terminal {entry.incoming.terminal} has no rooms assigned."
                 )
-                raise NotFound(_(f"Terminal has no suiteable rooms assigned."))
+                raise NotFound(_(f"Terminal has no suitable rooms assigned."))
             elif room_count == 1:
                 room = entry.terminal.rooms.first()
             else:
