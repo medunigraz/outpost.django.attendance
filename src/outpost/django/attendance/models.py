@@ -112,10 +112,19 @@ class CampusOnlineHolding(models.Model):
     @transition(field=state, source="pending", target="running")
     def start(self):
         self.initiated = timezone.now()
+        logger.info(f"Starting holding {self}")
+        cohs = CampusOnlineHolding.objects.filter(
+            room=self.room, state="running"
+        ).exclude(pk=self.pk)
+        for coh in cohs:
+            logger.info(f"Ending holding {coh} because of new one")
+            coh.end()
+            coh.save()
         coes = CampusOnlineEntry.objects.filter(
             room=self.room, holding=None, state="created"
         )
         for coe in coes:
+            logger.debug(f"Assigning {coe} to {self}")
             coe.assign(self)
             coe.save()
 
