@@ -1,5 +1,7 @@
 import logging
 
+import django
+
 from django.conf import settings
 from django.contrib.postgres.fields import DateTimeRangeField, JSONField
 from django.db import models
@@ -35,7 +37,11 @@ class Terminal(NetworkedDeviceMixin, models.Model):
 
     class Meta:
         ordering = ("id",)
-        permissions = (("view_terminal", _("View Terminal")),)
+        permissions = (
+            (("view_terminal", _("View Terminal")),)
+            if django.VERSION < (2, 1)
+            else tuple()
+        )
 
     @property
     def plugins(self):
@@ -47,7 +53,7 @@ class Terminal(NetworkedDeviceMixin, models.Model):
 
 
 class Entry(models.Model):
-    terminal = models.ForeignKey("Terminal")
+    terminal = models.ForeignKey("Terminal", on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(
         "campusonline.Student",
@@ -58,7 +64,9 @@ class Entry(models.Model):
 
     class Meta:
         get_latest_by = "created"
-        permissions = (("view_entry", _("View Entry")),)
+        permissions = (
+            (("view_entry", _("View Entry")),) if django.VERSION < (2, 1) else tuple()
+        )
 
     def __str__(s):
         return f"{s.student} [{s.created}: {s.terminal}]"
@@ -107,7 +115,11 @@ class CampusOnlineHolding(models.Model):
 
     class Meta:
         get_latest_by = "initiated"
-        permissions = (("view_campusonlineholding", _("View CAMPUSonline Holding")),)
+        permissions = (
+            (("view_campusonlineholding", _("View CAMPUSonline Holding")),)
+            if django.VERSION < (2, 1)
+            else tuple()
+        )
 
     @transition(field=state, source="pending", target="running")
     def start(self):
@@ -209,7 +221,11 @@ class CampusOnlineEntry(models.Model):
 
     class Meta:
         ordering = ("incoming__created", "assigned", "ended")
-        permissions = (("view_campusonlineentry", _("View CAMPUSonline Entry")),)
+        permissions = (
+            (("view_campusonlineentry", _("View CAMPUSonline Entry")),)
+            if django.VERSION < (2, 1)
+            else tuple()
+        )
 
     def __str__(s):
         return f"{s.incoming}: {s.state}"
@@ -255,7 +271,11 @@ class Statistics(models.Model):
 
     class Meta:
         ordering = ("id",)
-        permissions = (("view_statistics", _("View Statistics")),)
+        permissions = (
+            (("view_statistics", _("View Statistics")),)
+            if django.VERSION < (2, 1)
+            else tuple()
+        )
 
     def __str__(s):
         return f"{s.name} ({s.terminals.count()} Terminals / {s.active})"
