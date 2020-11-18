@@ -4,16 +4,16 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from guardian.shortcuts import get_objects_for_user
+from outpost.django.api.permissions import ExtendedDjangoModelPermissions
+from outpost.django.campusonline import models as co
 from rest_flex_fields.views import FlexFieldsMixin
 from rest_framework import exceptions, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import DjangoObjectPermissionsFilter, OrderingFilter
 from rest_framework.response import Response
 
-from outpost.django.api.permissions import ExtendedDjangoModelPermissions
-from outpost.django.campusonline import models as co
-
 from . import filters, models, serializers
+from .permissions import ActiveCampusOnlineHoldingPermission
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,32 @@ class CampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = filters.CampusOnlineEntryFilter
     ordering_fields = ("initiated",)
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, ActiveCampusOnlineHoldingPermission)
+    permit_list_expands = ("holding", "student")
+    http_method_names = viewsets.ModelViewSet.http_method_names + ["discard"]
+
+    def get_queryset(self):
+        username = self.request.user.username
+        return self.queryset.filter(
+            holding__lecturer__username=username, holding__state="running"
+        )
+
+    @action(methods=["discard"], detail=True)
+    def transition(self, request, pk=None):
+        entry = self.get_object()
+        getattr(entry, request.method.lower())()
+        entry.save()
+        data = self.serializer_class(entry).data
+        return Response(data)
+
+
+class ManualCampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
+    queryset = models.ManualCampusOnlineEntry.objects.all()
+    serializer_class = serializers.ManualCampusOnlineEntrySerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_class = filters.ManualCampusOnlineEntryFilter
+    ordering_fields = ("assigned",)
+    permission_classes = (permissions.IsAuthenticated, ActiveCampusOnlineHoldingPermission)
     permit_list_expands = ("holding", "student")
     http_method_names = viewsets.ModelViewSet.http_method_names + ["discard"]
 

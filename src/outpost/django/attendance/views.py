@@ -1,13 +1,13 @@
 import logging
+
 from django.utils.translation import gettext as _
-from rest_framework.views import APIView
+from outpost.django.campusonline import models as co
 from rest_framework import authentication, permissions
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from outpost.django.campusonline import models as co
 from . import models, serializers
-
 
 logger = logging.getLogger(__name__)
 

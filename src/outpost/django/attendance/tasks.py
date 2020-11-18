@@ -5,7 +5,9 @@ from celery.task import PeriodicTask, Task
 from celery.task.schedules import crontab
 from django.db.models import Q
 from django.utils import timezone
+from outpost.django.campusonline.models import CourseGroupTerm
 
+from .conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -30,21 +32,76 @@ class EntryCleanupTask(PeriodicTask):
 
 
 class CampusOnlineEntryCleanupTask(PeriodicTask):
+    """
+    End all CO entries that were registered for a room but where not assigned
+    to a holding in a certain timeframe.
+
+    It works by covering cases where a holding was never started:
+
+    A student registers ahead of the offical start time of a holding:
+
+        Search for a planned holding happening after the registration time.
+        Then check if this holding has already ended according to CAMPUSonline.
+        If so, the CO entry is canceled.
+
+    A student registers during the official holding time:
+
+        If there is at least a configurable buffer of time between the
+        registration time and the next planned holding, cancel it.
+
+        If the CO entry was registered within the buffer of time to a
+        subsequent holding, leave the CO entry as it is.
+    """
+
     run_every = timedelta(minutes=5)
 
     def run(self, **kwargs):
         from .models import CampusOnlineEntry
 
-        past = timezone.now() - timedelta(hours=12)
-        logger.info(f"Cleaning up CO entries older than {past}")
-        cond = {"state": "created", "incoming__created__lt": past}
-        for e in CampusOnlineEntry.objects.filter(**cond):
+        now = timezone.now()
+        logger.info(f"Cleaning up CO entries")
+        for e in CampusOnlineEntry.objects.filter(state="created"):
+            # Check for next or current CGT
+            cgt_base = CourseGroupTerm.objects.filter(
+                room=e.room, start__date=e.created, end__date=e.created
+            ).order_by("start")
+            cgt = cgt_base.filter(
+                start__lte=e.created + settings.ATTENDANCE_CAMPUSONLINE_ENTRY_LIFETIME,
+                end__gte=e.created,
+            ).first()
+            if not cgt:
+                # The is no planned holding left for today.
+                if e.created + settings.ATTENDANCE_CAMPUSONLINE_ENTRY_LIFETIME > now:
+                    # CO entry still inside entry lifetime, do nothing.
+                    continue
+            else:
+                if e.created > cgt.start:
+                    # CO entry is within planned holding, look for start of
+                    # next planned holding.
+                    cgt_next = cgt_base.filter(start__gte=cgt.end).first()
+                    if (
+                        cgt_next.start - settings.ATTENDANCE_CAMPUSONLINE_ENTRY_BUFFER
+                        < e.created
+                    ):
+                        # CO entry was created within buffer ahead of the
+                        # following holding, do nothing.
+                        continue
+                if cgt.end > now:
+                    # Holding is still within planned time range, do nothing.
+                    continue
             logger.debug(f"Canceling CO entry {e}")
             e.cancel()
             e.save()
 
 
 class CampusOnlineHoldingCleanupTask(PeriodicTask):
+    """
+    Clean up holdings that were not ended manually.
+
+    Ends when current time is greater than start of holding plus official time from
+    CAMPUSonline holding plus overdraft time from settings.
+    """
+
     run_every = timedelta(minutes=5)
 
     def run(self, **kwargs):
@@ -54,6 +111,6 @@ class CampusOnlineHoldingCleanupTask(PeriodicTask):
         # TODO: Fix filter to find holding that have recently ended
         for h in CampusOnlineHolding.objects.filter(state="running"):
             period = h.course_group_term.end - h.course_group_term.start
-            if h.initiated + period + timedelta(hours=2) < now:
+            if h.initiated + period + settings.ATTENDANCE_HOLDING_OVERDRAFT < now:
                 h.end(finished=h.initiated + period)
                 h.save()

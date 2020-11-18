@@ -1,7 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from django_filters import CharFilter, ModelChoiceFilter
 from django_filters.rest_framework import filters, filterset
-
 from outpost.django.campusonline.models import CourseGroupTerm, Room
 
 from . import models
@@ -65,4 +64,27 @@ class CampusOnlineEntryFilter(filterset.FilterSet):
 
     class Meta:
         model = models.CampusOnlineEntry
+        fields = {}
+
+
+class ManualCampusOnlineEntryFilter(filterset.FilterSet):
+    """
+    ## Filters
+
+    To filter for exact value matches:
+
+        ?<fieldname>=<value>
+
+    For advanced filtering use lookups:
+
+        ?<fieldname>__<lookup>=<value>
+
+    Possible lookups:
+
+      - `initiated`: `exact`, `gt`, `gte`, `lt`, `lte`, `date`
+      - `finished`: `exact`, `gt`, `gte`, `lt`, `lte`, `date`
+    """
+
+    class Meta:
+        model = models.ManualCampusOnlineEntry
         fields = {}

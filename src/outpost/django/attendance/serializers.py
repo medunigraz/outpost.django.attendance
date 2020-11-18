@@ -1,8 +1,9 @@
-from rest_flex_fields import FlexFieldsModelSerializer
-from rest_framework import exceptions, serializers
-
+from django.utils.translation import gettext_lazy as _
 from outpost.django.campusonline.models import Person
 from outpost.django.campusonline.serializers import StudentSerializer
+from rest_flex_fields import FlexFieldsModelSerializer
+from rest_framework import exceptions, serializers
+from rest_framework.exceptions import ValidationError
 
 from . import models
 
@@ -112,13 +113,47 @@ class CampusOnlineEntrySerializer(FlexFieldsModelSerializer):
         ),
         "student": (
             "outpost.django.campusonline.serializers.StudentSerializer",
-            {"source": "incoming.student", "read_only": False},
+            {"source": "incoming.student", "read_only": True},
         ),
     }
 
     class Meta:
         model = models.CampusOnlineEntry
         fields = ("id", "assigned", "ended", "state", "holding", "student")
+        read_only_fields = ("id", "assigned", "ended", "state")
+
+
+class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
+    """
+    ## Expansions
+
+    To activate relation expansion add the desired fields as a comma separated
+    list to the `expand` query parameter like this:
+
+        ?expand=<field>,<field>,<field>,...
+
+    The following relational fields can be expanded:
+
+     * `holding`
+     * `student`
+
+    """
+
+    expandable_fields = {
+        "holding": (
+            f"{__package__}.CampusOnlineHoldingSerializer",
+            {"source": "holding", "read_only": True},
+        ),
+        "student": (
+            "outpost.django.campusonline.serializers.StudentSerializer",
+            {"source": "student", "read_only": True},
+        ),
+    }
+
+    class Meta:
+        model = models.ManualCampusOnlineEntry
+        fields = ("id", "assigned", "ended", "state", "holding", "student")
+        read_only_fields = ("id", "assigned", "ended", "state")
 
 
 class StatisticsEntrySerializer(serializers.ModelSerializer):

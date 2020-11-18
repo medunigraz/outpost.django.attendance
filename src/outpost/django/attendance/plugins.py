@@ -5,9 +5,8 @@ import pluggy
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from rest_framework.exceptions import NotFound
-
 from outpost.django.base.plugins import Plugin
+from rest_framework.exceptions import NotFound
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +132,9 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                         f"Terminal {entry.incoming.terminal} has no room with PK {room_id} assigned."
                     )
                     raise NotFound(_(f"No such room found for terminal."))
-            coe = CampusOnlineEntry.objects.create(incoming=entry, room=room)
+            coe = CampusOnlineEntry.objects.create(
+                incoming=entry, room=room, created=entry.created
+            )
             logger.debug(f"Student {entry.student} entering {room}")
             try:
                 holding = CampusOnlineHolding.objects.get(

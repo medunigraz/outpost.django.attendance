@@ -8,14 +8,32 @@ import outpost.django.base.fields
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('attendance', '0020_auto_20200805_1403'),
-    ]
+    dependencies = [("attendance", "0020_auto_20200805_1403")]
 
     operations = [
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=outpost.django.base.fields.ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistiken'), ('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger')], max_length=256), default=list, size=None),
-        ),
+            model_name="terminal",
+            name="behaviour",
+            field=outpost.django.base.fields.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistiken",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
+        )
     ]

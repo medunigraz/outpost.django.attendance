@@ -1,19 +1,19 @@
 import logging
+from datetime import timedelta
 
 import django
-
-from django.conf import settings
 from django.contrib.postgres.fields import DateTimeRangeField, JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from model_utils.models import TimeStampedModel
-
 from outpost.django.base.decorators import signal_connect
 from outpost.django.base.fields import ChoiceArrayField
 from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
+from outpost.django.campusonline.models import CourseGroupTerm
 
+from .conf import settings
 from .plugins import TerminalBehaviour
 
 logger = logging.getLogger(__name__)
@@ -142,50 +142,22 @@ class CampusOnlineHolding(models.Model):
 
     @transition(field=state, source="running", target="finished")
     def end(self, finished=None):
-        from django.db import connection
-
-        coes = CampusOnlineEntry.objects.filter(
-            holding=self, state__in=("assigned", "left")
-        )
+        logger.info(f"Ending holding {self}")
         self.finished = finished or timezone.now()
-        query = """
-        INSERT INTO campusonline.stud_lv_anw (
-            buchung_nr,
-            stud_nr,
-            grp_nr,
-            termin_nr,
-            anm_begin,
-            anm_ende
-            ) VALUES (
-                %s,
-                %s,
-                %s,
-                %s,
-                %s,
-                %s
-            );
-        """
-        for coe in coes:
-            if coe.state == "assigned":
-                coe.complete(finished=finished)
-                coe.save()
-            logger.debug(f"{coe} ending")
-            data = [
-                coe.id,
-                coe.incoming.student.id,
-                coe.holding.course_group_term.coursegroup.id,
-                coe.holding.course_group_term.term,
-                coe.assigned,
-                coe.ended,
-            ]
-            logger.debug(f"{coe} writing to CAMPUSonline")
-            with connection.cursor() as cursor:
-                cursor.execute(query, data)
+        for coe in self.entries.filter(state__in=("assigned", "left")):
+            coe.complete(finished=self.finished)
+            coe.save()
+        for coe in self.manual_entries.filter(state__in=("assigned", "left")):
+            coe.complete(finished=self.finished)
+            coe.save()
 
     @transition(field=state, source=("running", "pending"), target="canceled")
     def cancel(self):
-        query = {"holding": self, "state__in": ("assigned", "left")}
-        for coe in CampusOnlineEntry.objects.filter(**query):
+        logger.info(f"Canceling holding {self}")
+        for coe in self.entries.filter(state__in=("assigned", "left")):
+            coe.pullout()
+            coe.save()
+        for coe in self.manual_entries.filter(state__in=("assigned", "left")):
             coe.pullout()
             coe.save()
 
@@ -256,12 +228,128 @@ class CampusOnlineEntry(models.Model):
 
     @transition(field=state, source=("assigned", "left"), target="complete")
     def complete(self, entry=None, finished=None):
+        from django.db import connection
+
+        query = """
+        INSERT INTO campusonline.stud_lv_anw (
+            buchung_nr,
+            stud_nr,
+            grp_nr,
+            termin_nr,
+            anm_begin,
+            anm_ende
+            ) VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            );
+        """
         logger.debug(f"{self} completing")
-        self.ended = finished or timezone.now()
+        if self.state == "assigned":
+            self.ended = finished or timezone.now()
         if entry:
             self.outgoing = entry
-        if False:
-            CampusOnlineEntry.objects.create()
+        data = [
+            self.id,
+            self.incoming.student.id,
+            self.holding.course_group_term.coursegroup.id,
+            self.holding.course_group_term.term,
+            self.assigned,
+            self.ended,
+        ]
+        logger.debug(f"{self} writing to CAMPUSonline")
+        with connection.cursor() as cursor:
+            cursor.execute(query, data)
+        continuation = (
+            CourseGroupTerm.objects.filter(
+                room=self.room,
+                coursegroup__students=self.incoming.student,
+                start__gt=self.holding.course_group_term.end,
+                start__lt=self.holding.course_group_term.end
+                + settings.ATTENDANCE_CONTINUATION_BUFFER,
+            )
+            .order_by("start")
+            .first()
+        )
+        if continuation:
+            logger.debug(f"Creating continuation for {self}")
+            self.objects.create(incoming=self.incoming, room=self.room)
+
+
+class ManualCampusOnlineEntry(models.Model):
+    assigned = models.DateTimeField(null=True, blank=True)
+    ended = models.DateTimeField(null=True, blank=True)
+    holding = models.ForeignKey(
+        "CampusOnlineHolding", models.CASCADE, related_name="manual_entries"
+    )
+    student = models.ForeignKey(
+        "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="+"
+    )
+    room = models.ForeignKey(
+        "campusonline.Room", models.DO_NOTHING, db_constraint=False, related_name="+"
+    )
+    state = FSMField(default="assigned")
+
+    class Meta:
+        ordering = ("assigned", "ended")
+        permissions = (
+            (("view_manualcampusonlineentry", _("View manual CAMPUSonline Entry")),)
+            if django.VERSION < (2, 1)
+            else tuple()
+        )
+
+    def __str__(s):
+        return f"{s.student} ({s.assigned}): {s.state}"
+
+    @transition(field=state, source=("assigned", "left"), target="canceled")
+    def discard(self):
+        logger.debug(f"Discarding {self}")
+        self.assigned = None
+        self.ended = timezone.now()
+
+    @transition(field=state, source="assigned", target="left")
+    def leave(self):
+        logger.debug(f"{self} leaving")
+        self.ended = timezone.now()
+
+    @transition(field=state, source=("assigned", "left"), target="complete")
+    def complete(self, finished=None):
+        from django.db import connection
+
+        query = """
+        INSERT INTO campusonline.stud_lv_anw (
+            buchung_nr,
+            stud_nr,
+            grp_nr,
+            termin_nr,
+            anm_begin,
+            anm_ende
+            ) VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            );
+        """
+        logger.debug(f"{self} completing")
+        if self.state == "assigned":
+            self.ended = finished or timezone.now()
+        data = [
+            self.id,
+            self.student.id,
+            self.holding.course_group_term.coursegroup.id,
+            self.holding.course_group_term.term,
+            self.assigned,
+            self.ended,
+        ]
+        logger.debug(f"{self} writing to CAMPUSonline")
+        with connection.cursor() as cursor:
+            cursor.execute(query, data)
 
 
 class Statistics(models.Model):

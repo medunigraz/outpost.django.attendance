@@ -8,9 +8,7 @@ import outpost.django.base.fields
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("attendance", "0018_auto_20200219_1136"),
-    ]
+    dependencies = [("attendance", "0018_auto_20200219_1136")]
 
     operations = [
         migrations.AlterField(
@@ -37,5 +35,5 @@ class Migration(migrations.Migration):
                 default=list,
                 size=None,
             ),
-        ),
+        )
     ]
