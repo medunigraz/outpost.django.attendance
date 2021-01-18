@@ -1,9 +1,11 @@
 import logging
 from datetime import timedelta
+from itertools import chain
 
 import django
 from django.contrib.postgres.fields import DateTimeRangeField, JSONField
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
@@ -14,6 +16,7 @@ from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
 from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings
+from .tasks import EmailExternalsTask
 from .plugins import TerminalBehaviour
 
 logger = logging.getLogger(__name__)
@@ -125,17 +128,43 @@ class CampusOnlineHolding(models.Model):
     def start(self):
         self.initiated = timezone.now()
         logger.info(f"Starting holding {self}")
+        # Find COHs in the current room, that are not parallel holdings and end
+        # them. Parallel holdings are left running if there are any.
         cohs = CampusOnlineHolding.objects.filter(
             room=self.room, state="running"
-        ).exclude(pk=self.pk)
+        ).exclude(
+            Q(pk=self.pk)
+            | Q(course_group_term__pk=self.course_group_term.pk)
+            | (
+                Q(course_group_term__room=self.course_group_term.room)
+                & Q(course_group_term__start=self.course_group_term.start)
+                & Q(course_group_term__end=self.course_group_term.end)
+            )
+        )
         for coh in cohs:
             logger.info(f"Ending holding {coh} because of new one")
             coh.end()
             coh.save()
+        parallel = CourseGroupTerm.objects.filter(
+            room=self.course_group_term.room,
+            start=self.course_group_term.start,
+            end=self.course_group_term.end,
+        ).exclude(pk=self.course_group_term.pk)
+        parallel_students = list(
+            chain(*[c.coursegroup.students.all() for c in parallel])
+        )
         coes = CampusOnlineEntry.objects.filter(
             room=self.room, holding=None, state="created"
         )
         for coe in coes:
+            # If there are parallel holdins, check if student is in a group
+            # other than the one started right now.
+            if parallel.exists():
+                if coe.incoming.student in parallel_students:
+                    # Student is officially part of another holding, skip them.
+                    # If a holding is started for their group, they will be
+                    # picked up then.
+                    continue
             logger.debug(f"Assigning {coe} to {self}")
             coe.assign(self)
             coe.save()
@@ -147,9 +176,10 @@ class CampusOnlineHolding(models.Model):
         for coe in self.entries.filter(state__in=("assigned", "left")):
             coe.complete(finished=self.finished)
             coe.save()
-        for coe in self.manual_entries.filter(state__in=("assigned", "left")):
-            coe.complete(finished=self.finished)
-            coe.save()
+        for mcoe in self.manual_entries.filter(state__in=("assigned", "left")):
+            mcoe.complete(finished=self.finished)
+            mcoe.save()
+        EmailExternalsTask().delay(self.pk)
 
     @transition(field=state, source=("running", "pending"), target="canceled")
     def cancel(self):
@@ -190,6 +220,7 @@ class CampusOnlineEntry(models.Model):
         related_name="+",
     )
     state = FSMField(default="created")
+    accredited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("incoming__created", "assigned", "ended")
@@ -212,6 +243,9 @@ class CampusOnlineEntry(models.Model):
     def assign(self, holding):
         logger.debug(f"Assigning {self} to {holding}")
         self.holding = holding
+        self.accredited = self.holding.course_group_term.coursegroup.students.filter(
+            pk=self.incoming.student.pk
+        ).exists()
         self.assigned = timezone.now()
 
     @transition(field=state, source=("assigned", "left"), target="canceled")
@@ -279,6 +313,7 @@ class CampusOnlineEntry(models.Model):
             self.objects.create(incoming=self.incoming, room=self.room)
 
 
+@signal_connect
 class ManualCampusOnlineEntry(models.Model):
     assigned = models.DateTimeField(null=True, blank=True)
     ended = models.DateTimeField(null=True, blank=True)
@@ -292,6 +327,7 @@ class ManualCampusOnlineEntry(models.Model):
         "campusonline.Room", models.DO_NOTHING, db_constraint=False, related_name="+"
     )
     state = FSMField(default="assigned")
+    accredited = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("assigned", "ended")
@@ -303,6 +339,12 @@ class ManualCampusOnlineEntry(models.Model):
 
     def __str__(s):
         return f"{s.student} ({s.assigned}): {s.state}"
+
+    def pre_save(self, *args, **kwargs):
+        if not self.pk:
+            self.accredited = self.holding.course_group_term.coursegroup.students.filter(
+                pk=self.student.pk
+            ).exists()
 
     @transition(field=state, source=("assigned", "left"), target="canceled")
     def discard(self):

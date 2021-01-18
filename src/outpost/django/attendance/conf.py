@@ -5,10 +5,10 @@ from django.conf import settings
 
 
 class AttendanceAppConf(AppConf):
-    CONTINUATION_BUFFER = timedelta(minutes=30)
-    HOLDING_OVERDRAFT = timedelta(minutes=15)
+    CAMPUSONLINE_HOLDING_OVERDRAFT = timedelta(minutes=15)
     CAMPUSONLINE_ENTRY_LIFETIME = timedelta(minutes=45)
     CAMPUSONLINE_ENTRY_BUFFER_END = timedelta(minutes=15)
+    CAMPUSONLINE_CONTINUATION_BUFFER = timedelta(minutes=30)
     PHONE_NUMBER_REGION = "AT"
 
     class Meta:

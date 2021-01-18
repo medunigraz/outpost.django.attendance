@@ -3,13 +3,52 @@ from datetime import timedelta
 
 from celery.task import PeriodicTask, Task
 from celery.task.schedules import crontab
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.template.loader import render_to_string
 from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+class EmailExternalsTask(Task):
+    def run(self, pk_coh, pks_coe, pks_mcoe):
+        from .models import (
+            CampusOnlineHolding,
+            CampusOnlineEntry,
+            ManualCampusOnlineEntry,
+        )
+
+        coh = CampusOnlineHolding.objects.get(pk=pk_coh)
+        if pks_coe:
+            coes = CampusOnlineEntry.objects.filter(pk__in=pks_coe)
+        else:
+            coes = CampusOnlineEntry.objects.empty()
+        if pks_mcoe:
+            mcoes = ManualCampusOnlineEntry.objects.filter(pk__in=pks_mcoe)
+        else:
+            mcoes = ManualCampusOnlineEntry.objects.empty()
+
+        logger.info(f"Sending mail for {coh}")
+
+        context = {"coh": coh, "coes": coes, "mcoes": mcoes}
+
+        msg = EmailMultiAlternatives(
+            _(f"External attendees for {coh.course_group_termi.coursegroup}"),
+            render_to_string("attendance/mail/external_attendees.txt", context),
+            settings.DEFAULT_FROM_EMAIL,
+            [coh.course_group_term.person.email],
+        )
+        msg.attach_alternative(
+            render_to_string("attendance/mail/external_attendees.html", context),
+            "text/html",
+        )
+        msg.content_subtype = "html"
+        msg.send()
 
 
 class EntryCleanupTask(PeriodicTask):
@@ -61,10 +100,10 @@ class CampusOnlineEntryCleanupTask(PeriodicTask):
         now = timezone.now()
         logger.info(f"Cleaning up CO entries")
         for e in CampusOnlineEntry.objects.filter(state="created"):
-            # Check for next or current CGT
             cgt_base = CourseGroupTerm.objects.filter(
                 room=e.room, start__date=e.created, end__date=e.created
             ).order_by("start")
+            # Check for next or current CGT
             cgt = cgt_base.filter(
                 start__lte=e.created + settings.ATTENDANCE_CAMPUSONLINE_ENTRY_LIFETIME,
                 end__gte=e.created,
@@ -108,7 +147,6 @@ class CampusOnlineHoldingCleanupTask(PeriodicTask):
         from .models import CampusOnlineHolding
 
         now = timezone.now()
-        # TODO: Fix filter to find holding that have recently ended
         for h in CampusOnlineHolding.objects.filter(state="running"):
             period = h.course_group_term.end - h.course_group_term.start
             if h.initiated + period + settings.ATTENDANCE_HOLDING_OVERDRAFT < now:

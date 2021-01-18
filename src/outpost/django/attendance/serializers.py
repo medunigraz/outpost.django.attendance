@@ -119,8 +119,16 @@ class CampusOnlineEntrySerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = models.CampusOnlineEntry
-        fields = ("id", "assigned", "ended", "state", "holding", "student")
-        read_only_fields = ("id", "assigned", "ended", "state")
+        fields = (
+            "id",
+            "assigned",
+            "ended",
+            "state",
+            "holding",
+            "student",
+            "accredited",
+        )
+        read_only_fields = ("id", "assigned", "ended", "state", "accredited")
 
 
 class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
@@ -152,8 +160,16 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = models.ManualCampusOnlineEntry
-        fields = ("id", "assigned", "ended", "state", "holding", "student")
-        read_only_fields = ("id", "assigned", "ended", "state")
+        fields = (
+            "id",
+            "assigned",
+            "ended",
+            "state",
+            "holding",
+            "student",
+            "accredited",
+        )
+        read_only_fields = ("id", "assigned", "ended", "state", "accredited")
 
 
 class StatisticsEntrySerializer(serializers.ModelSerializer):
