@@ -156,6 +156,10 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
             "outpost.django.campusonline.serializers.StudentSerializer",
             {"source": "student", "read_only": True},
         ),
+        "room": (
+            "outpost.django.campusonline.serializers.RoomSerializer",
+            {"source": "room", "read_only": True},
+        ),
     }
 
     class Meta:
@@ -163,6 +167,7 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
         fields = (
             "id",
             "assigned",
+            "room",
             "ended",
             "state",
             "holding",
