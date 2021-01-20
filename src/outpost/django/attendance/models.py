@@ -341,10 +341,21 @@ class ManualCampusOnlineEntry(models.Model):
         return f"{s.student} ({s.assigned}): {s.state}"
 
     def pre_save(self, *args, **kwargs):
-        if not self.pk:
-            self.accredited = self.holding.course_group_term.coursegroup.students.filter(
-                pk=self.student.pk
-            ).exists()
+        if self.pk:
+            return
+        # Fetch previous entries for the same student in the same holding and
+        # mark them as 'leave' if they are assigned again.
+        previous = ManualCampusOnlineEntry.objects.filter(
+            student=self.student, holding=self.holding, state="assigned"
+        )
+        for p in previous:
+            p.leave()
+            p.save()
+        # Check if student is officially part of this holdings course group and
+        # mark them as accredited if this is the case.
+        self.accredited = self.holding.course_group_term.coursegroup.students.filter(
+            pk=self.student.pk
+        ).exists()
 
     @transition(field=state, source=("assigned", "left"), target="canceled")
     def discard(self):
