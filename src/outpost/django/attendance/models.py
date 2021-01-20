@@ -315,7 +315,7 @@ class CampusOnlineEntry(models.Model):
 
 @signal_connect
 class ManualCampusOnlineEntry(models.Model):
-    assigned = models.DateTimeField(null=True, blank=True)
+    assigned = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     ended = models.DateTimeField(null=True, blank=True)
     holding = models.ForeignKey(
         "CampusOnlineHolding", models.CASCADE, related_name="manual_entries"
