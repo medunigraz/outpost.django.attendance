@@ -315,6 +315,41 @@ class CampusOnlineEntry(models.Model):
 
 @signal_connect
 class ManualCampusOnlineEntry(models.Model):
+    """
+    ## Fields
+
+    ### `id` (`integer`)
+    Primary key.
+
+    ### `assigned` (`datetime`)
+    The datetime an entry was created, which is identical to the datetime the
+    lecturer added the student to their holding.
+
+    ### `ended` (`datetime`)
+    The datetime an entry was ended by the lecturer or by the automatic cleanup
+    task. It the entry was discarded, this will be `null`.
+
+    ### `holding` (`integer`)
+    Primary key for the holding this entry was created for.
+
+    ### `student` (`integer`)
+    Primary key for the CAMPUSonline student this entry was created for.
+
+    ### `room` (`integer`)
+    Primary key for the CAMPUSonline room this entry was created for.
+
+    ### `state` (`string`)
+    Current state of this entry:
+
+     * `assigned` (Student is attending the holding right now, default)
+     * `canceled` (Student was removed from the holding by the lecturer)
+     * `left` (Student has left the holding)
+     * `completed` (Lecturer has completed the holding and student was recorded as being present)
+
+    ### `accedited` (`boolean`)
+    If `True`, student is part of the official course group for this holding.
+    """
+
     assigned = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     ended = models.DateTimeField(null=True, blank=True)
     holding = models.ForeignKey(
