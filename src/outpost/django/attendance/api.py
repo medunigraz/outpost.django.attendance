@@ -60,7 +60,10 @@ class CampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = filters.CampusOnlineEntryFilter
     ordering_fields = ("initiated",)
-    permission_classes = (permissions.IsAuthenticated, ActiveCampusOnlineHoldingPermission)
+    permission_classes = (
+        permissions.IsAuthenticated,
+        ActiveCampusOnlineHoldingPermission,
+    )
     permit_list_expands = ("holding", "student")
     http_method_names = viewsets.ModelViewSet.http_method_names + ["discard"]
 
