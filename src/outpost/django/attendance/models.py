@@ -185,10 +185,10 @@ class CampusOnlineHolding(models.Model):
     def cancel(self):
         logger.info(f"Canceling holding {self}")
         for coe in self.entries.filter(state__in=("assigned", "left")):
-            coe.pullout()
+            coe.discard()
             coe.save()
         for coe in self.manual_entries.filter(state__in=("assigned", "left")):
-            coe.pullout()
+            coe.discard()
             coe.save()
 
     def __str__(s):
