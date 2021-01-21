@@ -53,6 +53,10 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             f"{__package__}.CampusOnlineEntrySerializer",
             {"source": "entries", "read_only": True, "many": True},
         ),
+        "entries": (
+            f"{__package__}.ManualCampusOnlineEntrySerializer",
+            {"source": "manual_entries", "read_only": True, "many": True},
+        ),
     }
 
     class Meta:
@@ -65,6 +69,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             "course_group_term",
             "room",
             "entries",
+            "manual_entries",
         )
         read_only_fields = ("id", "state", "initiated", "finished", "entries")
 
