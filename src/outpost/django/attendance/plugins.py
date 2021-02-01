@@ -133,7 +133,7 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                     )
                     raise NotFound(_(f"No such room found for terminal."))
             coe = CampusOnlineEntry.objects.create(
-                incoming=entry, room=room, created=entry.created
+                incoming=entry, room=room
             )
             logger.debug(f"Student {entry.student} entering {room}")
             try:
