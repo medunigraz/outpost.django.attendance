@@ -303,7 +303,7 @@ class CampusOnlineEntry(models.Model):
                 coursegroup__students=self.incoming.student,
                 start__gt=self.holding.course_group_term.end,
                 start__lt=self.holding.course_group_term.end
-                + settings.ATTENDANCE_CONTINUATION_BUFFER,
+                + settings.ATTENDANCE_CAMPUSONLINE_CONTINUATION_BUFFER,
             )
             .order_by("start")
             .first()
