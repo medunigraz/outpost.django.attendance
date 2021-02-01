@@ -93,7 +93,7 @@ class ManualCampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
         ActiveCampusOnlineHoldingPermission,
     )
     permit_list_expands = ("holding", "student", "room")
-    http_method_names = viewsets.ModelViewSet.http_method_names + ["discard"]
+    http_method_names = viewsets.ModelViewSet.http_method_names + ["discard", "leave"]
 
     def get_queryset(self):
         username = self.request.user.username
@@ -101,7 +101,7 @@ class ManualCampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
             holding__lecturer__username=username, holding__state="running"
         )
 
-    @action(methods=["discard"], detail=True)
+    @action(methods=["discard", "leave"], detail=True)
     def transition(self, request, pk=None):
         entry = self.get_object()
         getattr(entry, request.method.lower())()
