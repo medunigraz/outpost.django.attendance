@@ -137,10 +137,18 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
             )
             logger.debug(f"Student {entry.student} entering {room}")
             try:
-                holding = CampusOnlineHolding.objects.get(
+                holdings = CampusOnlineHolding.objects.filter(
                     room=room, initiated__lte=timezone.now(), state="running"
                 )
-                coe.assign(holding)
+                for holding in holdings:
+                    if entry.student in holding.course_group_term.coursegroup.students.all():
+                        coe.assign(holding)
+                        break
+                else:
+                    # TODO: Find a better way to handle unoffical attendants
+                    # with multiple parallel holdings. Right now it assigns to
+                    # the first holding from all parallel ones.
+                    coe.assign(holdings.first())
                 msg = _(
                     f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}"
                 )
