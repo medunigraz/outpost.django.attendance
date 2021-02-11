@@ -53,7 +53,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             f"{__package__}.CampusOnlineEntrySerializer",
             {"source": "entries", "read_only": True, "many": True},
         ),
-        "entries": (
+        "manual_entries": (
             f"{__package__}.ManualCampusOnlineEntrySerializer",
             {"source": "manual_entries", "read_only": True, "many": True},
         ),
