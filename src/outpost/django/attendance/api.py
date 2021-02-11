@@ -32,7 +32,13 @@ class CampusOnlineHoldingViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     filter_class = filters.CampusOnlineHoldingFilter
     ordering_fields = ("initiated",)
     permission_classes = (permissions.IsAuthenticated,)
-    permit_list_expands = ("entries", "entries.student", "course_group_term")
+    permit_list_expands = (
+        "entries",
+        "entries.student",
+        "manual_entries",
+        "manual_entries.student",
+        "course_group_term",
+    )
     http_method_names = viewsets.ModelViewSet.http_method_names + [
         "start",
         "end",
