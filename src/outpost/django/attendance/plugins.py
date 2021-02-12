@@ -136,26 +136,25 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                 incoming=entry, room=room
             )
             logger.debug(f"Student {entry.student} entering {room}")
-            try:
-                holdings = CampusOnlineHolding.objects.filter(
-                    room=room, initiated__lte=timezone.now(), state="running"
-                )
-                if holdings.count() > 0:
-                    for holding in holdings:
-                        if entry.student in holding.course_group_term.coursegroup.students.all():
-                            coe.assign(holding)
-                            break
-                    else:
-                        # TODO: Find a better way to handle unoffical attendants
-                        # with multiple parallel holdings. Right now it assigns to
-                        # the first holding from all parallel ones.
-                        coe.assign(holdings.first())
-                    msg = _(
-                        f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}"
-                    )
+            holdings = CampusOnlineHolding.objects.filter(
+                room=room, initiated__lte=timezone.now(), state="running"
+            )
+            if holdings.count() > 0:
+                for holding in holdings:
+                    if entry.student in holding.course_group_term.coursegroup.students.all():
+                        coe.assign(holding)
+                        break
                 else:
-                    logger.debug(f"No active holding found for {coe}")
-                    msg = _("Welcome {coe.incoming.student.display}")
+                    # TODO: Find a better way to handle unoffical attendants
+                    # with multiple parallel holdings. Right now it assigns to
+                    # the first holding from all parallel ones.
+                    coe.assign(holdings.first())
+                msg = _(
+                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}"
+                )
+            else:
+                logger.debug(f"No active holding found for {coe}")
+                msg = _("Welcome {coe.incoming.student.display}")
         coe.save()
         return msg.format(coe=coe)
 
