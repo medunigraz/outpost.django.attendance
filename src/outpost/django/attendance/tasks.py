@@ -5,9 +5,9 @@ from celery.task import PeriodicTask, Task
 from celery.task.schedules import crontab
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings

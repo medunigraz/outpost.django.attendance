@@ -16,8 +16,8 @@ from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
 from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings
-from .tasks import EmailExternalsTask
 from .plugins import TerminalBehaviour
+from .tasks import EmailExternalsTask
 
 logger = logging.getLogger(__name__)
 

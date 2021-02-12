@@ -132,16 +132,17 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                         f"Terminal {entry.incoming.terminal} has no room with PK {room_id} assigned."
                     )
                     raise NotFound(_(f"No such room found for terminal."))
-            coe = CampusOnlineEntry.objects.create(
-                incoming=entry, room=room
-            )
+            coe = CampusOnlineEntry.objects.create(incoming=entry, room=room)
             logger.debug(f"Student {entry.student} entering {room}")
             holdings = CampusOnlineHolding.objects.filter(
                 room=room, initiated__lte=timezone.now(), state="running"
             )
             if holdings.count() > 0:
                 for holding in holdings:
-                    if entry.student in holding.course_group_term.coursegroup.students.all():
+                    if (
+                        entry.student
+                        in holding.course_group_term.coursegroup.students.all()
+                    ):
                         coe.assign(holding)
                         break
                 else:
