@@ -43,6 +43,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
      * `entries`
 
     """
+    accredited = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     expandable_fields = {
         "course_group_term": (
@@ -57,6 +58,10 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             f"{__package__}.ManualCampusOnlineEntrySerializer",
             {"source": "manual_entries", "read_only": True, "many": True},
         ),
+        "accredited": (
+            "outpost.django.campusonline.serializers.StudentSerializer",
+            {"source": "accredited", "read_only": True, "many": True},
+        ),
     }
 
     class Meta:
@@ -70,8 +75,9 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             "room",
             "entries",
             "manual_entries",
+            "accredited",
         )
-        read_only_fields = ("id", "state", "initiated", "finished", "entries")
+        read_only_fields = ("id", "state", "initiated", "finished", "entries", "accredited")
 
     def save(self):
         request = self.context.get("request", None)

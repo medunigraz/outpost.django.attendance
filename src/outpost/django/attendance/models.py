@@ -191,6 +191,12 @@ class CampusOnlineHolding(models.Model):
             coe.discard()
             coe.save()
 
+    @property
+    def accredited(self):
+        for group in self.course_group_term.coursegroup.course.groups.all():
+            for student in group.students.all():
+                yield student
+
     def __str__(s):
         return f"{s.course_group_term} [{s.lecturer}, {s.room}: {s.state}]"
 

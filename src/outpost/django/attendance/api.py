@@ -38,6 +38,7 @@ class CampusOnlineHoldingViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
         "manual_entries",
         "manual_entries.student",
         "course_group_term",
+        "accredited",
     )
     http_method_names = viewsets.ModelViewSet.http_method_names + [
         "start",
