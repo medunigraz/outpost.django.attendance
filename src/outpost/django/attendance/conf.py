@@ -10,6 +10,8 @@ class AttendanceAppConf(AppConf):
     CAMPUSONLINE_ENTRY_BUFFER_END = timedelta(minutes=15)
     CAMPUSONLINE_CONTINUATION_BUFFER = timedelta(minutes=30)
     PHONE_NUMBER_REGION = "AT"
+    STUDENT_MATRICULATION_MASK = '*'
+    STUDENT_MATRICULATION_UNMASKED = 3
 
     class Meta:
         prefix = "attendance"

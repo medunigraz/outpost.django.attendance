@@ -1,11 +1,24 @@
 from django.utils.translation import gettext_lazy as _
 from outpost.django.campusonline.models import Person
-from outpost.django.campusonline.serializers import StudentSerializer
+from outpost.django.campusonline.serializers import StudentSerializer, SerializerMethodField
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 
+from .conf import settings
 from . import models
+
+
+class MaskedStudentSerializer(StudentSerializer):
+    matriculation = SerializerMethodField()
+
+    class Meta(StudentSerializer.Meta):
+        fields = StudentSerializer.Meta.fields + ("matriculation",)
+
+    def get_matriculation(self, obj):
+        char = settings.ATTENDANCE_STUDENT_MATRICULATION_MASK
+        mask = settings.ATTENDANCE_STUDENT_MATRICULATION_UNMASKED
+        return char * (len(obj.matriculation) - mask) + obj.matriculation[-mask:]
 
 
 class TerminalSerializer(FlexFieldsModelSerializer):
@@ -59,7 +72,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             {"source": "manual_entries", "read_only": True, "many": True},
         ),
         "accredited": (
-            "outpost.django.campusonline.serializers.StudentSerializer",
+            f"{__package__}.MaskedStudentSerializer",
             {"source": "accredited", "read_only": True, "many": True},
         ),
     }
