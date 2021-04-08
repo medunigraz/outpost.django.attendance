@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from outpost.django.campusonline.models import Person
-from outpost.django.campusonline.serializers import StudentSerializer, SerializerMethodField
+from outpost.django.campusonline.serializers import AuthenticatedStudentSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
@@ -9,11 +9,11 @@ from .conf import settings
 from . import models
 
 
-class MaskedStudentSerializer(StudentSerializer):
-    matriculation = SerializerMethodField()
+class MaskedStudentSerializer(AuthenticatedStudentSerializer):
+    matriculation = serializers.SerializerMethodField()
 
-    class Meta(StudentSerializer.Meta):
-        fields = StudentSerializer.Meta.fields + ("matriculation",)
+    class Meta(AuthenticatedStudentSerializer.Meta):
+        fields = AuthenticatedStudentSerializer.Meta.fields + ("matriculation",)
 
     def get_matriculation(self, obj):
         char = settings.ATTENDANCE_STUDENT_MATRICULATION_MASK
