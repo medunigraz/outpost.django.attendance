@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class TerminalViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
-    queryset = models.Terminal.objects.all()
+    queryset = models.Terminal.objects.filter(enabled=True, online=True)
     serializer_class = serializers.TerminalSerializer
     permission_classes = (ExtendedDjangoModelPermissions,)
     permit_list_expands = ("rooms",)
