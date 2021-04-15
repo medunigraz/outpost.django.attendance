@@ -1,8 +1,7 @@
 import logging
 from datetime import timedelta
 
-from celery.task import PeriodicTask, Task
-from celery.task.schedules import crontab
+from celery import shared_task
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -15,8 +14,10 @@ from .conf import settings
 logger = logging.getLogger(__name__)
 
 
-class EmailExternalsTask(Task):
-    def run(self, pk_coh, pks_coe, pks_mcoe):
+class CampusOnlineHoldingTasks:
+
+    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineHolding:email_unaccredited")
+    def email_unaccredited(task, pk_coh, pks_coe, pks_mcoe):
         from .models import (
             CampusOnlineHolding,
             CampusOnlineEntry,
@@ -50,11 +51,28 @@ class EmailExternalsTask(Task):
         msg.content_subtype = "html"
         msg.send()
 
+    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineHolding:cleanup")
+    def cleanup(task):
+        """
+        Clean up holdings that were not ended manually.
 
-class EntryCleanupTask(PeriodicTask):
-    run_every = timedelta(minutes=15)
+        Ends when current time is greater than start of holding plus official time from
+        CAMPUSonline holding plus overdraft time from settings.
+        """
+        from .models import CampusOnlineHolding
 
-    def run(self, **kwargs):
+        now = timezone.now()
+        for h in CampusOnlineHolding.objects.filter(state="running"):
+            period = h.course_group_term.end - h.course_group_term.start
+            if h.initiated + period + settings.ATTENDANCE_HOLDING_OVERDRAFT < now:
+                h.end(finished=h.initiated + period)
+                h.save()
+
+
+class EntryTasks:
+
+    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.Entry:cleanup")
+    def cleanup(task):
         from outpost.django.campusonline.models import Student
         from .models import Entry
 
@@ -70,31 +88,30 @@ class EntryCleanupTask(PeriodicTask):
                 e.save()
 
 
-class CampusOnlineEntryCleanupTask(PeriodicTask):
-    """
-    End all CO entries that were registered for a room but where not assigned
-    to a holding in a certain timeframe.
+class CampusOnlineEntryTasks:
 
-    It works by covering cases where a holding was never started:
+    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineEntry:cleanup")
+    def cleanup(task):
+        """
+        End all CO entries that were registered for a room but where not assigned
+        to a holding in a certain timeframe.
 
-    A student registers ahead of the offical start time of a holding:
+        It works by covering cases where a holding was never started:
 
-        Search for a planned holding happening after the registration time.
-        Then check if this holding has already ended according to CAMPUSonline.
-        If so, the CO entry is canceled.
+        A student registers ahead of the offical start time of a holding:
 
-    A student registers during the official holding time:
+            Search for a planned holding happening after the registration time.
+            Then check if this holding has already ended according to CAMPUSonline.
+            If so, the CO entry is canceled.
 
-        If there is at least a configurable buffer of time between the
-        registration time and the next planned holding, cancel it.
+        A student registers during the official holding time:
 
-        If the CO entry was registered within the buffer of time to a
-        subsequent holding, leave the CO entry as it is.
-    """
+            If there is at least a configurable buffer of time between the
+            registration time and the next planned holding, cancel it.
 
-    run_every = timedelta(minutes=5)
-
-    def run(self, **kwargs):
+            If the CO entry was registered within the buffer of time to a
+            subsequent holding, leave the CO entry as it is.
+        """
         from .models import CampusOnlineEntry
 
         now = timezone.now()
@@ -131,24 +148,3 @@ class CampusOnlineEntryCleanupTask(PeriodicTask):
             logger.debug(f"Canceling CO entry {e}")
             e.cancel()
             e.save()
-
-
-class CampusOnlineHoldingCleanupTask(PeriodicTask):
-    """
-    Clean up holdings that were not ended manually.
-
-    Ends when current time is greater than start of holding plus official time from
-    CAMPUSonline holding plus overdraft time from settings.
-    """
-
-    run_every = timedelta(minutes=5)
-
-    def run(self, **kwargs):
-        from .models import CampusOnlineHolding
-
-        now = timezone.now()
-        for h in CampusOnlineHolding.objects.filter(state="running"):
-            period = h.course_group_term.end - h.course_group_term.start
-            if h.initiated + period + settings.ATTENDANCE_HOLDING_OVERDRAFT < now:
-                h.end(finished=h.initiated + period)
-                h.save()

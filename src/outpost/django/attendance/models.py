@@ -17,7 +17,7 @@ from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings
 from .plugins import TerminalBehaviour
-from .tasks import EmailExternalsTask
+from .tasks import CampusOnlineHoldingTasks
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ class CampusOnlineHolding(models.Model):
         for mcoe in self.manual_entries.filter(state__in=("assigned", "left")):
             mcoe.complete(finished=self.finished)
             mcoe.save()
-        EmailExternalsTask().delay(self.pk)
+        CampusOnlineHoldingTasks.email_unaccredited.delay(self.pk)
 
     @transition(field=state, source=("running", "pending"), target="canceled")
     def cancel(self):
