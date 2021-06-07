@@ -60,7 +60,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
 
     expandable_fields = {
         "course_group_term": (
-            f"outpost.django.campusonline.serializers.CourseGroupTermSerializer",
+            "outpost.django.campusonline.serializers.CourseGroupTermSerializer",
             {"source": "course_group_term", "read_only": True},
         ),
         "entries": (
