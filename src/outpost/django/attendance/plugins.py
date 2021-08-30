@@ -127,7 +127,7 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                 room_id = payload.get(f"{self.__class__.__name__}:room")
                 try:
                     room = entry.terminal.rooms.get(pk=room_id)
-                except entry.terminal.rooms.DoesNotExist:
+                except entry.terminal.rooms.model.DoesNotExist:
                     logger.warn(
                         f"Terminal {entry.incoming.terminal} has no room with PK {room_id} assigned."
                     )
