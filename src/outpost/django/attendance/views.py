@@ -7,6 +7,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from outpost.django.campusonline.serializers import AuthenticatedStudentSerializer
 from . import models, serializers
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class ClockView(APIView):
         return Response(
             {
                 "terminal": serializers.TerminalSerializer(self.terminal).data,
-                "student": serializers.StudentSerializer(self.student).data,
+                "student": AuthenticatedStudentSerializer(self.student).data,
                 "cardid": self.student.cardid,
                 "data": [entry for entry in data if entry],
             }
@@ -55,7 +56,7 @@ class ClockView(APIView):
         return Response(
             {
                 "terminal": serializers.TerminalSerializer(self.terminal).data,
-                "student": serializers.StudentSerializer(self.student).data,
+                "student": AuthenticatedStudentSerializer(self.student).data,
                 "cardid": self.student.cardid,
                 "entry": entry.pk,
                 "data": [entry for entry in data if entry],
