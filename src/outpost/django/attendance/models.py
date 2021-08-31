@@ -173,13 +173,19 @@ class CampusOnlineHolding(models.Model):
     def end(self, finished=None):
         logger.info(f"Ending holding {self}")
         self.finished = finished or timezone.now()
-        for coe in self.entries.filter(state__in=("assigned", "left")):
+        coes = self.entries.filter(state__in=("assigned", "left"))
+        mcoes = self.manual_entries.filter(state__in=("assigned", "left"))
+        for coe in coes:
             coe.complete(finished=self.finished)
             coe.save()
-        for mcoe in self.manual_entries.filter(state__in=("assigned", "left")):
+        for mcoe in mcoes:
             mcoe.complete(finished=self.finished)
             mcoe.save()
-        CampusOnlineHoldingTasks.email_unaccredited.delay(self.pk)
+        CampusOnlineHoldingTasks.email_unaccredited.delay(
+            self.pk,
+            [coe.pk for coe in coes],
+            [mcoes.pk for mcoe in mcoes]
+        )
 
     @transition(field=state, source=("running", "pending"), target="canceled")
     def cancel(self):
