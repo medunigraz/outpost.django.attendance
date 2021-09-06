@@ -17,5 +17,6 @@ v1 = [
         api.ManualCampusOnlineEntryViewSet,
         "attendance-manualcampusonline-entry",
     ),
+    (r"attendance/roomstate", api.RoomStateViewSet, "attendance-roomstate"),
     (r"attendance/statistics", api.StatisticsViewSet, "attendance-statistics"),
 ]

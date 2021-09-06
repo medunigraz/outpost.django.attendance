@@ -1,5 +1,7 @@
+from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from outpost.django.campusonline.models import Person
+from outpost.django.campusonline.models import Person, Room, Student
 from outpost.django.campusonline.serializers import AuthenticatedStudentSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import exceptions, serializers
@@ -199,6 +201,50 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
             "accredited",
         )
         read_only_fields = ("id", "assigned", "ended", "state", "accredited")
+
+
+class RoomStateSerializer(FlexFieldsModelSerializer):
+    """
+    ## Expansions
+
+    To activate relation expansion add the desired fields as a comma separated
+    list to the `expand` query parameter like this:
+
+        ?expand=<field>,<field>,<field>,...
+
+    The following relational fields can be expanded:
+
+     * `students`
+
+    """
+    students = serializers.SerializerMethodField()
+    #students = AuthenticatedStudentSerializer(source="get_students", many=True)
+
+    expandable_fields = {
+        "students": (
+            "outpost.django.campusonline.serializers.StudentSerializer",
+            {"source": "students", "read_only": True, "many": True},
+        ),
+    }
+
+    class Meta:
+        model = Room
+        fields = (
+            "id",
+            "students",
+        )
+        read_only_fields = ("id", "students")
+
+    def get_students(self, obj):
+        s = Student.objects.filter(
+            Q(attendance__campusonlineentry__room=obj) | Q(manualcampusonlineentry__room=obj),
+            roomallocation__room=obj,
+            roomallocation__onsite=False,
+            roomallocation__start__lt=timezone.now(),
+            roomallocation__end__gt=timezone.now(),
+        )
+        # TODO: Check vaccination status
+        return AuthenticatedStudentSerializer(s, many=True).data
 
 
 class StatisticsEntrySerializer(serializers.ModelSerializer):
