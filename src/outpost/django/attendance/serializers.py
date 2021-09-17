@@ -203,48 +203,52 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
         read_only_fields = ("id", "assigned", "ended", "state", "accredited")
 
 
-class RoomStateSerializer(FlexFieldsModelSerializer):
+class RoomStateSerializer(serializers.ModelSerializer):
     """
-    ## Expansions
-
-    To activate relation expansion add the desired fields as a comma separated
-    list to the `expand` query parameter like this:
-
-        ?expand=<field>,<field>,<field>,...
-
-    The following relational fields can be expanded:
-
-     * `students`
-
     """
-    students = serializers.SerializerMethodField()
-    #students = AuthenticatedStudentSerializer(source="get_students", many=True)
-
-    expandable_fields = {
-        "students": (
-            "outpost.django.campusonline.serializers.StudentSerializer",
-            {"source": "students", "read_only": True, "many": True},
-        ),
-    }
+    cards = serializers.SerializerMethodField()
+    manuals = serializers.SerializerMethodField()
 
     class Meta:
         model = Room
         fields = (
             "id",
-            "students",
+            "cards",
+            "manuals",
         )
-        read_only_fields = ("id", "students")
+        read_only_fields = ("id", "cards", "manuals")
 
-    def get_students(self, obj):
-        s = Student.objects.filter(
-            Q(attendance__campusonlineentry__room=obj) | Q(manualcampusonlineentry__room=obj),
-            roomallocation__room=obj,
-            roomallocation__onsite=False,
-            roomallocation__start__lt=timezone.now(),
-            roomallocation__end__gt=timezone.now(),
-        )
-        # TODO: Check vaccination status
-        return AuthenticatedStudentSerializer(s, many=True).data
+    def get_cards(self, obj):
+        coes = models.CampusOnlineEntry.objects.filter(
+            Q(
+                incoming__student__roomallocation__room=obj,
+                incoming__student__roomallocation__onsite=False,
+                incoming__student__roomallocation__start__lt=timezone.now(),
+                incoming__student__roomallocation__end__gt=timezone.now(),
+            ) | Q(
+                incoming__student__immunized=False,
+            ),
+            room=obj,
+            state__in=("created", "assigned"),
+            incoming__created__date=timezone.now().date()
+        ).select_related("incoming__student")
+        return CampusOnlineEntrySerializer(coes, many=True, expand=["student"]).data
+
+    def get_manuals(self, obj):
+        mcoes = models.ManualCampusOnlineEntry.objects.filter(
+            Q(
+                student__roomallocation__room=obj,
+                student__roomallocation__onsite=False,
+                student__roomallocation__start__lt=timezone.now(),
+                student__roomallocation__end__gt=timezone.now(),
+            ) | Q(
+                student__immunized=False,
+            ),
+            room=obj,
+            state="assigned",
+            assigned__date=timezone.now().date()
+        ).select_related("student")
+        return ManualCampusOnlineEntrySerializer(mcoes, many=True, expand=["student"]).data
 
 
 class StatisticsEntrySerializer(serializers.ModelSerializer):
