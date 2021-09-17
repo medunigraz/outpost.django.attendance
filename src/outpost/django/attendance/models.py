@@ -361,7 +361,7 @@ class ManualCampusOnlineEntry(models.Model):
      * `left` (Student has left the holding)
      * `completed` (Lecturer has completed the holding and student was recorded as being present)
 
-    ### `accedited` (`boolean`)
+    ### `accredited` (`boolean`)
     If `True`, student is part of the official course group for this holding.
     """
 
