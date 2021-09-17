@@ -371,7 +371,7 @@ class ManualCampusOnlineEntry(models.Model):
         "CampusOnlineHolding", models.CASCADE, related_name="manual_entries"
     )
     student = models.ForeignKey(
-        "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="manualcampusonlineentry"
+        "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="manual_attendance"
     )
     room = models.ForeignKey(
         "campusonline.Room", models.DO_NOTHING, db_constraint=False, related_name="+"
