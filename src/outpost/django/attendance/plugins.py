@@ -186,3 +186,18 @@ class StatisticsTerminalBehaviour(TerminalBehaviourPlugin):
                 se = StatisticsEntry.objects.create(statistics=s, incoming=entry)
                 msg.append(_("Concluded: {statistic}").format(statistic=s))
         return msg
+
+
+class ImmunizationTerminalBehaviour(TerminalBehaviourPlugin):
+
+    name = _("Immunization")
+
+    @TerminalBehaviour.hookimpl
+    def clock(self, entry, payload):
+        logger.debug(f"{self.__class__.__name__}: immunization({entry})")
+        if entry.student.immunized:
+            msg = _("Immunized!")
+        else:
+            msg = _("Not Immunized!")
+        msg = list()
+        return msg
