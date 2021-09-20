@@ -232,7 +232,7 @@ class RoomStateSerializer(serializers.ModelSerializer):
             ) | Q(
                 incoming__student__immunized=False,
             )
-        ).select_related("incoming__student")
+        ).distinct().select_related("incoming__student")
         return CampusOnlineEntrySerializer(coes, many=True, expand=["student"]).data
 
     def get_manuals(self, obj):
@@ -249,7 +249,7 @@ class RoomStateSerializer(serializers.ModelSerializer):
             ) | Q(
                 student__immunized=False,
             )
-        ).select_related("student")
+        ).distinct().select_related("student")
         return ManualCampusOnlineEntrySerializer(mcoes, many=True, expand=["student"]).data
 
 
