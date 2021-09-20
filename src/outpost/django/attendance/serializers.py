@@ -220,6 +220,10 @@ class RoomStateSerializer(serializers.ModelSerializer):
 
     def get_cards(self, obj):
         coes = models.CampusOnlineEntry.objects.filter(
+            room=obj,
+            state__in=("created", "assigned"),
+            incoming__created__date=timezone.now().date()
+        ).filter(
             Q(
                 incoming__student__roomallocation__room=obj,
                 incoming__student__roomallocation__onsite=False,
@@ -227,15 +231,16 @@ class RoomStateSerializer(serializers.ModelSerializer):
                 incoming__student__roomallocation__end__gt=timezone.now(),
             ) | Q(
                 incoming__student__immunized=False,
-            ),
-            room=obj,
-            state__in=("created", "assigned"),
-            incoming__created__date=timezone.now().date()
+            )
         ).select_related("incoming__student")
         return CampusOnlineEntrySerializer(coes, many=True, expand=["student"]).data
 
     def get_manuals(self, obj):
         mcoes = models.ManualCampusOnlineEntry.objects.filter(
+            room=obj,
+            state="assigned",
+            assigned__date=timezone.now().date()
+        ).filter(
             Q(
                 student__roomallocation__room=obj,
                 student__roomallocation__onsite=False,
@@ -243,10 +248,7 @@ class RoomStateSerializer(serializers.ModelSerializer):
                 student__roomallocation__end__gt=timezone.now(),
             ) | Q(
                 student__immunized=False,
-            ),
-            room=obj,
-            state="assigned",
-            assigned__date=timezone.now().date()
+            )
         ).select_related("student")
         return ManualCampusOnlineEntrySerializer(mcoes, many=True, expand=["student"]).data
 
