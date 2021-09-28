@@ -138,7 +138,7 @@ class CampusOnlineEntrySerializer(FlexFieldsModelSerializer):
             {"source": "holding", "read_only": True},
         ),
         "student": (
-            "outpost.django.campusonline.serializers.StudentSerializer",
+            "outpost.django.campusonline.serializers.AuthenticatedStudentSerializer",
             {"source": "incoming.student", "read_only": True},
         ),
     }
@@ -179,7 +179,7 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
             {"source": "holding", "read_only": True},
         ),
         "student": (
-            "outpost.django.campusonline.serializers.StudentSerializer",
+            "outpost.django.campusonline.serializers.AuthenticatedStudentSerializer",
             {"source": "student", "read_only": True},
         ),
         "room": (
