@@ -194,6 +194,9 @@ class ImmunizationTerminalBehaviour(TerminalBehaviourPlugin):
 
     @TerminalBehaviour.hookimpl
     def preflight(self, terminal, student):
-        if student.immunized:
+        if not student.immunized:
             raise Exception(_("Not Immunized!"))
+
+    @TerminalBehaviour.hookimpl
+    def clock(self, entry, payload):
         return _("Immunized!")
