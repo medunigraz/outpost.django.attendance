@@ -199,5 +199,4 @@ class ImmunizationTerminalBehaviour(TerminalBehaviourPlugin):
             msg = _("Immunized!")
         else:
             msg = _("Not Immunized!")
-        msg = list()
         return msg
