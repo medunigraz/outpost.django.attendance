@@ -193,10 +193,7 @@ class ImmunizationTerminalBehaviour(TerminalBehaviourPlugin):
     name = _("Immunization")
 
     @TerminalBehaviour.hookimpl
-    def clock(self, entry, payload):
-        logger.debug(f"{self.__class__.__name__}: immunization({entry})")
-        if entry.student.immunized:
-            msg = _("Immunized!")
-        else:
-            msg = _("Not Immunized!")
-        return msg
+    def preflight(self, terminal, student):
+        if student.immunized:
+            raise Exception(_("Not Immunized!"))
+        return _("Immunized!")

@@ -2,7 +2,7 @@ import logging
 
 from django.utils.translation import gettext as _
 from outpost.django.campusonline import models as co
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions, status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -35,9 +35,12 @@ class ClockView(APIView):
 
     def get(self, request, **kwargs):
         logger.debug(f"Preflight request for {self.terminal}:{self.student}")
-        data = self.terminal.plugins.hook.preflight(
-            terminal=self.terminal, student=self.student
-        )
+        try:
+            data = self.terminal.plugins.hook.preflight(
+                terminal=self.terminal, student=self.student
+            )
+        except Exception as e:
+            return Response(str(e), status.HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "terminal": serializers.TerminalSerializer(self.terminal).data,
