@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from outpost.django.campusonline.models import Person, Room, Student
+from outpost.django.campusonline.models import Person, Room, Student, RoomAllocation
 from outpost.django.campusonline.serializers import AuthenticatedStudentSerializer
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import exceptions, serializers
@@ -203,6 +203,42 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
         read_only_fields = ("id", "assigned", "ended", "state", "accredited")
 
 
+class RoomStateCampusOnlineEntrySerializer(CampusOnlineEntrySerializer):
+    onsite = serializers.SerializerMethodField()
+
+    class Meta(CampusOnlineEntrySerializer.Meta):
+        fields = CampusOnlineEntrySerializer.Meta.fields + (
+            "onsite",
+        )
+
+    def get_onsite(self, obj):
+        return RoomAllocation.objects.filter(
+            student=obj.incoming.student,
+            room=obj.room,
+            start__lte=timezone.now(),
+            end__gte=timezone.now(),
+            onsite=True
+        ).exists()
+
+
+class RoomStateManualCampusOnlineEntrySerializer(ManualCampusOnlineEntrySerializer):
+    onsite = serializers.SerializerMethodField()
+
+    class Meta(ManualCampusOnlineEntrySerializer.Meta):
+        fields = ManualCampusOnlineEntrySerializer.Meta.fields + (
+            "onsite",
+        )
+
+    def get_onsite(self, obj):
+        return RoomAllocation.objects.filter(
+            student=obj.student,
+            room=obj.room,
+            start__lte=timezone.now(),
+            end__gte=timezone.now(),
+            onsite=True
+        ).exists()
+
+
 class RoomStateSerializer(serializers.ModelSerializer):
     """
     """
@@ -223,34 +259,16 @@ class RoomStateSerializer(serializers.ModelSerializer):
             room=obj,
             state__in=("created", "assigned"),
             incoming__created__date=timezone.now().date()
-        ).filter(
-            Q(
-                incoming__student__roomallocation__room=obj,
-                incoming__student__roomallocation__onsite=False,
-                incoming__student__roomallocation__start__lt=timezone.now(),
-                incoming__student__roomallocation__end__gt=timezone.now(),
-            ) | Q(
-                incoming__student__immunized=False,
-            )
         ).distinct().select_related("incoming__student")
-        return CampusOnlineEntrySerializer(coes, many=True, expand=["student"]).data
+        return RoomStateCampusOnlineEntrySerializer(coes, many=True, expand=["student"]).data
 
     def get_manuals(self, obj):
         mcoes = models.ManualCampusOnlineEntry.objects.filter(
             room=obj,
             state="assigned",
             assigned__date=timezone.now().date()
-        ).filter(
-            Q(
-                student__roomallocation__room=obj,
-                student__roomallocation__onsite=False,
-                student__roomallocation__start__lt=timezone.now(),
-                student__roomallocation__end__gt=timezone.now(),
-            ) | Q(
-                student__immunized=False,
-            )
         ).distinct().select_related("student")
-        return ManualCampusOnlineEntrySerializer(mcoes, many=True, expand=["student"]).data
+        return RoomStateManualCampusOnlineEntrySerializer(mcoes, many=True, expand=["student"]).data
 
 
 class StatisticsEntrySerializer(serializers.ModelSerializer):
