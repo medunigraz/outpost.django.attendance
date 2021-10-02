@@ -109,7 +109,7 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                         coe.leave(entry)
                     msg = _(
                         f"Thank you for attending {coe.holding.course_group_term.coursegroup}"
-                    )
+                    ).format(coe=coe)
                 except ObjectDoesNotExist as e:
                     logger.warn(f"Inconsitent holding found for entry {coe}: {e}")
                     msg = _("Goodbye")
@@ -151,13 +151,15 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                     # the first holding from all parallel ones.
                     coe.assign(holdings.first())
                 msg = _(
-                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}"
+                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}".format(coe=coe)
                 )
             else:
                 logger.debug(f"No active holding found for {coe}")
-                msg = _("Welcome {coe.incoming.student.display}")
+                msg = _("Welcome {coe.incoming.student.display}").format(coe=coe)
+            if not entry.student.immunized:
+                msg = _("Please reach out to your instructor")
         coe.save()
-        return msg.format(coe=coe)
+        return msg
 
 
 class StatisticsTerminalBehaviour(TerminalBehaviourPlugin):
