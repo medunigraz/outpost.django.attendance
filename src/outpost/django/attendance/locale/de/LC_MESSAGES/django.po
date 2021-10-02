@@ -8,49 +8,75 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-26 14:09+0200\n"
+"POT-Creation-Date: 2021-10-02 21:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:38
+#: models.py:44
 msgid "View Terminal"
 msgstr "Terminal anzeigen"
 
-#: models.py:58
+#: models.py:71
 msgid "View Entry"
 msgstr "Buchung anzeigen"
 
-#: models.py:107
+#: models.py:122
 msgid "View CAMPUSonline Holding"
 msgstr "CAMPUSonline Abhaltung anzeigen"
 
-#: models.py:198
+#: models.py:243
 msgid "View CAMPUSonline Entry"
 msgstr "CAMPUSonline-Buchung anzeigen"
 
-#: models.py:244
+#: models.py:385
+msgid "View manual CAMPUSonline Entry"
+msgstr "Manuelle CAMPUSonline-Buchung anzeigen"
+
+#: models.py:466
 msgid "View Statistics"
 msgstr "Statistiken anzeigen"
 
-#: plugins.py:47
+#: permissions.py:9
+msgid "No active holdings found for this user."
+msgstr ""
+
+#: plugins.py:48
 msgid "Debugger"
 msgstr "Debugger"
 
-#: plugins.py:62
+#: plugins.py:63
 msgid "CAMPUSonline"
 msgstr "CAMPUSonline"
 
-#: plugins.py:81
+#: plugins.py:82
 msgid "Please select room"
 msgstr "Bitte Raum auswählen"
 
-#: plugins.py:113
+#: plugins.py:103 plugins.py:115
+msgid "Goodbye"
+msgstr "Auf Wiedersehen"
+
+#: plugins.py:111
+#, python-brace-format
+msgid "Thank you for attending {coe.holding.course_group_term.coursegroup}"
+msgstr ""
+"Danke für Ihre Teilnahme an {coe.holding.course_group_term.coursegroup}"
+
+#: plugins.py:123
+msgid "Terminal has no suitable rooms assigned."
+msgstr "Terminal hat keine pasenden Räume zugewiesen."
+
+#: plugins.py:134
+msgid "No such room found for terminal."
+msgstr "Kein Raum für Terminal gefunden."
+
+#: plugins.py:154
 #, python-brace-format
 msgid ""
 "Welcome {coe.incoming.student.display} to {coe.holding.course_group_term."
@@ -59,40 +85,52 @@ msgstr ""
 "Willkommen {coe.incoming.student.display} zu {coe.holding.course_group_term."
 "coursegroup}"
 
-#: plugins.py:117
+#: plugins.py:158
 #, python-brace-format
 msgid "Welcome {coe.incoming.student.display}"
 msgstr "Willkommen {coe.incoming.student.display}"
 
-#: plugins.py:126
-msgid "Goodbye"
-msgstr "Auf Wiedersehen"
+#: plugins.py:160
+msgid "Please reach out to your instructor"
+msgstr "Bitte wenden Sie sich an Ihre Lehrperson"
 
-#: plugins.py:133
-#, python-brace-format
-msgid "Thank you for attending {coe.holding.course_group_term.coursegroup}"
-msgstr ""
-"Danke für Ihre Teilnahme an {coe.holding.course_group_term.coursegroup}"
-
-#: plugins.py:141
+#: plugins.py:167
 msgid "Statistics"
 msgstr "Statistiken"
 
-#: plugins.py:160
+#: plugins.py:186
 #, python-brace-format
 msgid "Recorded: {statistic}"
 msgstr "Aufgezeichnet: {statistic}"
 
-#: plugins.py:163
+#: plugins.py:189
 #, python-brace-format
 msgid "Concluded: {statistic}"
 msgstr "Abgeschlossen: {statistic}"
 
-#: views.py:28
+#: plugins.py:195
+msgid "Immunization"
+msgstr "Immunisierung"
+
+#: plugins.py:200
+msgid "Not Immunized!"
+msgstr "Nicht Immunisiert!"
+
+#: plugins.py:204
+msgid "Immunized!"
+msgstr "Immunisiert!"
+
+#: tasks.py:42
+#, python-brace-format
+msgid "External attendees for {coh.course_group_termi.coursegroup}"
+msgstr ""
+"Externe Teilnehmer für {coh.course_group_termi.coursegroup}"
+
+#: views.py:29
 msgid "Unknown terminal identification"
 msgstr "Unbekanntes Terminal"
 
-#: views.py:33
+#: views.py:34
 msgid "Unknown student identification"
 msgstr "Unbekannte Studierendenkarte"
 
