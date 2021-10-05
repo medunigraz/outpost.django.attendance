@@ -215,7 +215,7 @@ class RoomStateCampusOnlineEntrySerializer(CampusOnlineEntrySerializer):
         return RoomAllocation.objects.filter(
             student=obj.incoming.student,
             room=obj.room,
-            start__lte=timezone.now(),
+            start__lte=timezone.now() + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
             end__gte=timezone.now(),
             onsite=True
         ).exists()
@@ -233,7 +233,7 @@ class RoomStateManualCampusOnlineEntrySerializer(ManualCampusOnlineEntrySerializ
         return RoomAllocation.objects.filter(
             student=obj.student,
             room=obj.room,
-            start__lte=timezone.now(),
+            start__lte=timezone.now() + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
             end__gte=timezone.now(),
             onsite=True
         ).exists()
