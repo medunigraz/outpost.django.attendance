@@ -13,6 +13,8 @@ from model_utils.models import TimeStampedModel
 from outpost.django.base.decorators import signal_connect
 from outpost.django.base.fields import ChoiceArrayField
 from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
+from outpost.django.base.utils import Uuid4Upload
+from outpost.django.base.validators import FileValidator
 from outpost.django.campusonline.models import CourseGroupTerm
 
 from .conf import settings
@@ -32,10 +34,17 @@ class Terminal(NetworkedDeviceMixin, models.Model):
             max_length=256,
             choices=[
                 (p.qualified(), p.name)
-                for p in TerminalBehaviour.manager().get_plugins()
+                for p in sorted(TerminalBehaviour.manager().get_plugins(), key=lambda p: p.qualified())
             ],
         ),
         default=list,
+    )
+    screen = models.ImageField(
+        upload_to=Uuid4Upload,
+        null=True,
+        validators=(
+            FileValidator(mimetypes=['image/png']),
+        ),
     )
 
     class Meta:
@@ -81,25 +90,19 @@ class CampusOnlineHolding(models.Model):
         "campusonline.CourseGroupTerm",
         models.DO_NOTHING,
         db_constraint=False,
-        null=True,
-        blank=True,
-        related_name="+",
+        related_name="campus_online_holdings",
     )
     room = models.ForeignKey(
         "campusonline.Room",
         models.DO_NOTHING,
         db_constraint=False,
-        null=True,
-        blank=True,
-        related_name="+",
+        related_name="campus_online_holdings",
     )
     lecturer = models.ForeignKey(
         "campusonline.Person",
         models.DO_NOTHING,
         db_constraint=False,
-        null=True,
-        blank=True,
-        related_name="+",
+        related_name="campus_online_holdings",
     )
     initiated = models.DateTimeField(null=True, blank=True)
     finished = models.DateTimeField(null=True, blank=True)

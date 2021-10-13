@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from outpost.django.campusonline.models import Person, Room, Student, RoomAllocation
 from outpost.django.campusonline.serializers import AuthenticatedStudentSerializer
+from outpost.django.base.serializers import Base64ImageField
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
@@ -24,6 +25,7 @@ class MaskedStudentSerializer(AuthenticatedStudentSerializer):
 
 
 class TerminalSerializer(FlexFieldsModelSerializer):
+    screen = Base64ImageField(required=False)
 
     expandable_fields = {
         "rooms": (
@@ -34,7 +36,7 @@ class TerminalSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = models.Terminal
-        fields = ("id", "rooms", "config")
+        fields = ("id", "rooms", "config", "screen")
 
 
 class EntrySerializer(serializers.ModelSerializer):
