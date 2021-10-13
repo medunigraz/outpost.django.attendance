@@ -70,7 +70,7 @@ class Terminal(NetworkedDeviceMixin, models.Model):
             return
         if self.screen == original.screen:
             return
-        original.screen.delete()
+        original.screen.delete(save=False)
 
     def __str__(self):
         return self.hostname
