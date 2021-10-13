@@ -17,7 +17,7 @@ class TerminalAdmin(admin.ModelAdmin):
     list_display = ("pk", "hostname", "enabled", "online", "list_rooms")
     list_filter = ("enabled", "online")
     search_fields = ("hostname", "rooms")
-    readonly_fields = ("online",)
+    readonly_fields = ("online", "screen", "config")
 
     def list_rooms(self, obj):
         rooms = "".join([f"<li>{r.name_full}</li>" for r in obj.rooms.all()])
