@@ -24,6 +24,7 @@ from .tasks import CampusOnlineHoldingTasks
 logger = logging.getLogger(__name__)
 
 
+@signal_connect
 class Terminal(NetworkedDeviceMixin, models.Model):
     rooms = models.ManyToManyField(
         "campusonline.Room", db_constraint=False, related_name="terminals"
@@ -59,6 +60,17 @@ class Terminal(NetworkedDeviceMixin, models.Model):
     def plugins(self):
         pm = TerminalBehaviour.manager(lambda p: p.qualified() in self.behaviour)
         return pm
+
+    def pre_save(self, *args, **kwargs):
+        if not self.pk:
+            return
+        try:
+            original = self.__class__.objects.get(pk=self.pk)
+        except self.__class__.DoesNotExist:
+            return
+        if self.screen == original.screen:
+            return
+        original.screen.delete()
 
     def __str__(self):
         return self.hostname
