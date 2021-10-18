@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
+from django_prometheus.models import ExportModelOperationsMixin
 from model_utils.models import TimeStampedModel
 from outpost.django.base.decorators import signal_connect
 from outpost.django.base.fields import ChoiceArrayField
@@ -76,7 +77,7 @@ class Terminal(NetworkedDeviceMixin, models.Model):
         return self.hostname
 
 
-class Entry(models.Model):
+class Entry(ExportModelOperationsMixin("attendance.Entry"), models.Model):
     terminal = models.ForeignKey("Terminal", on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     student = models.ForeignKey(
@@ -96,7 +97,7 @@ class Entry(models.Model):
         return f"{s.student} [{s.created}: {s.terminal}]"
 
 
-class CampusOnlineHolding(models.Model):
+class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHolding"), models.Model):
     state = FSMField(default="pending")
     course_group_term = models.ForeignKey(
         "campusonline.CourseGroupTerm",
@@ -225,7 +226,7 @@ class CampusOnlineHolding(models.Model):
         return f"{s.course_group_term} [{s.lecturer}, {s.room}: {s.state}]"
 
 
-class CampusOnlineEntry(models.Model):
+class CampusOnlineEntry(ExportModelOperationsMixin("attendance.CampusOnlineEntry"), models.Model):
     incoming = models.ForeignKey(
         "Entry", models.CASCADE, related_name="campusonlineentry"
     )
@@ -344,7 +345,7 @@ class CampusOnlineEntry(models.Model):
 
 
 @signal_connect
-class ManualCampusOnlineEntry(models.Model):
+class ManualCampusOnlineEntry(ExportModelOperationsMixin("attendance.ManualCampusOnlineEntry"), models.Model):
     """
     ## Fields
 
@@ -487,7 +488,7 @@ class Statistics(models.Model):
         return f"{s.name} ({s.terminals.count()} Terminals / {s.active})"
 
 
-class StatisticsEntry(models.Model):
+class StatisticsEntry(ExportModelOperationsMixin("attendance.StatisticsEntry"), models.Model):
     statistics = models.ForeignKey("Statistics", models.CASCADE, related_name="entries")
     incoming = models.ForeignKey("Entry", models.CASCADE, related_name="+")
     outgoing = models.ForeignKey(
