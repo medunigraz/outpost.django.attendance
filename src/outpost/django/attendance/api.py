@@ -9,8 +9,9 @@ from outpost.django.campusonline import models as co
 from rest_flex_fields.views import FlexFieldsMixin
 from rest_framework import exceptions, permissions, viewsets
 from rest_framework.decorators import action
-from rest_framework.filters import DjangoObjectPermissionsFilter, OrderingFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
+from rest_framework_guardian.filters import ObjectPermissionsFilter
 
 from . import filters, models, serializers
 from .permissions import ActiveCampusOnlineHoldingPermission
@@ -130,7 +131,7 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     queryset = models.Statistics.objects.all()
     serializer_class = serializers.StatisticsSerializer
     permission_classes = (ExtendedDjangoModelPermissions,)
-    filter_backends = (DjangoObjectPermissionsFilter,)
+    filter_backends = (ObjectPermissionsFilter,)
 
     # def get_queryset(self):
     #    return get_objects_for_user(
