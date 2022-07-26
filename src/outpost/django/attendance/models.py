@@ -16,7 +16,7 @@ from outpost.django.base.fields import ChoiceArrayField
 from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
 from outpost.django.base.utils import Uuid4Upload
 from outpost.django.base.validators import FileValidator
-from outpost.django.campusonline.models import CourseGroupTerm
+from outpost.django.campusonline.models import CourseGroupTerm, Student
 
 from .conf import settings
 from .plugins import TerminalBehaviour
@@ -173,6 +173,12 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
             room=self.room, holding=None, state="created"
         )
         for coe in coes:
+            try:
+                coe.incoming.student
+            except Student.DoesNotExist:
+                logger.warning(f"Removing entry with missing student (ID: {coe.incoming.student_id}")
+                coe.delete()
+                continue
             # If there are parallel holdins, check if student is in a group
             # other than the one started right now.
             if parallel.exists():
