@@ -328,8 +328,8 @@ class CampusOnlineEntry(ExportModelOperationsMixin("attendance.CampusOnlineEntry
             self.incoming.student.id,
             self.holding.course_group_term.coursegroup.id,
             self.holding.course_group_term.term,
-            self.assigned,
-            self.ended,
+            self.assigned.astimezone(timezone.get_current_timezone()),
+            self.ended.astimezone(timezone.get_current_timezone()),
         ]
         logger.debug(f"{self} writing to CAMPUSonline")
         with connection.cursor() as cursor:
