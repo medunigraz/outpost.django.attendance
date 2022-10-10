@@ -193,8 +193,37 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
 
     @transition(field=state, source="running", target="finished")
     def end(self, finished=None):
+        from django.db import connection
+
         logger.info(f"Ending holding {self}")
         self.finished = finished or timezone.now()
+
+        query = """
+        INSERT INTO campusonline.lv_anw (
+            buchung_nr,
+            grp_nr,
+            termin_nr,
+            lv_begin,
+            lv_ende
+            ) VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            );
+        """
+        data = [
+            self.id,
+            self.holding.course_group_term.coursegroup.id,
+            self.holding.course_group_term.term,
+            self.initiated.astimezone(timezone.get_current_timezone()),
+            self.finished.astimezone(timezone.get_current_timezone()),
+        ]
+        logger.debug(f"{self} writing to CAMPUSonline")
+        with connection.cursor() as cursor:
+            cursor.execute(query, data)
+
         coes = self.entries.filter(state__in=("assigned", "left"))
         mcoes = self.manual_entries.filter(state__in=("assigned", "left"))
         for coe in coes:
@@ -469,8 +498,8 @@ class ManualCampusOnlineEntry(ExportModelOperationsMixin("attendance.ManualCampu
             self.student.id,
             self.holding.course_group_term.coursegroup.id,
             self.holding.course_group_term.term,
-            self.assigned,
-            self.ended,
+            self.assigned.astimezone(timezone.get_current_timezone()),
+            self.ended.astimezone(timezone.get_current_timezone()),
         ]
         logger.debug(f"{self} writing to CAMPUSonline")
         with connection.cursor() as cursor:
