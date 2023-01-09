@@ -215,8 +215,8 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
         """
         data = [
             self.id,
-            self.holding.course_group_term.coursegroup.id,
-            self.holding.course_group_term.term,
+            self.course_group_term.coursegroup.id,
+            self.course_group_term.term,
             self.initiated.astimezone(timezone.get_current_timezone()),
             self.finished.astimezone(timezone.get_current_timezone()),
         ]
