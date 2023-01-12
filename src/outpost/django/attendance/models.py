@@ -202,10 +202,12 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
         INSERT INTO campusonline.lv_anw (
             buchung_nr,
             grp_nr,
+            lehrender_nr,
             termin_nr,
             lv_begin,
             lv_ende
             ) VALUES (
+                %s,
                 %s,
                 %s,
                 %s,
@@ -216,6 +218,7 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
         data = [
             self.id,
             self.course_group_term.coursegroup.id,
+            self.lecturer.pk,
             self.course_group_term.term,
             self.initiated.astimezone(timezone.get_current_timezone()),
             self.finished.astimezone(timezone.get_current_timezone()),
