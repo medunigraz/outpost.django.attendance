@@ -36,7 +36,10 @@ class Terminal(NetworkedDeviceMixin, models.Model):
             max_length=256,
             choices=[
                 (p.qualified(), p.name)
-                for p in sorted(TerminalBehaviour.manager().get_plugins(), key=lambda p: p.qualified())
+                for p in sorted(
+                    TerminalBehaviour.manager().get_plugins(),
+                    key=lambda p: p.qualified(),
+                )
             ],
         ),
         default=list,
@@ -44,9 +47,7 @@ class Terminal(NetworkedDeviceMixin, models.Model):
     screen = models.ImageField(
         upload_to=Uuid4Upload,
         null=True,
-        validators=(
-            FileValidator(mimetypes=['image/png']),
-        ),
+        validators=(FileValidator(mimetypes=["image/png"]),),
     )
 
     class Meta:
@@ -97,7 +98,9 @@ class Entry(ExportModelOperationsMixin("attendance.Entry"), models.Model):
         return f"{s.student} [{s.created}: {s.terminal}]"
 
 
-class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHolding"), models.Model):
+class CampusOnlineHolding(
+    ExportModelOperationsMixin("attendance.CampusOnlineHolding"), models.Model
+):
     state = FSMField(default="pending")
     course_group_term = models.ForeignKey(
         "campusonline.CourseGroupTerm",
@@ -176,7 +179,9 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
             try:
                 coe.incoming.student
             except Student.DoesNotExist:
-                logger.warning(f"Removing entry with missing student (ID: {coe.incoming.student_id}")
+                logger.warning(
+                    f"Removing entry with missing student (ID: {coe.incoming.student_id}"
+                )
                 coe.delete()
                 continue
             # If there are parallel holdins, check if student is in a group
@@ -236,9 +241,7 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
             mcoe.complete(finished=self.finished)
             mcoe.save()
         CampusOnlineHoldingTasks.email_unaccredited.delay(
-            self.pk,
-            [coe.pk for coe in coes],
-            [mcoes.pk for mcoe in mcoes]
+            self.pk, [coe.pk for coe in coes], [mcoes.pk for mcoe in mcoes]
         )
 
     @transition(field=state, source=("running", "pending"), target="canceled")
@@ -264,7 +267,9 @@ class CampusOnlineHolding(ExportModelOperationsMixin("attendance.CampusOnlineHol
         return f"{s.course_group_term} [{s.lecturer}, {s.room}: {s.state}]"
 
 
-class CampusOnlineEntry(ExportModelOperationsMixin("attendance.CampusOnlineEntry"), models.Model):
+class CampusOnlineEntry(
+    ExportModelOperationsMixin("attendance.CampusOnlineEntry"), models.Model
+):
     incoming = models.ForeignKey(
         "Entry", models.CASCADE, related_name="campusonlineentry"
     )
@@ -383,7 +388,9 @@ class CampusOnlineEntry(ExportModelOperationsMixin("attendance.CampusOnlineEntry
 
 
 @signal_connect
-class ManualCampusOnlineEntry(ExportModelOperationsMixin("attendance.ManualCampusOnlineEntry"), models.Model):
+class ManualCampusOnlineEntry(
+    ExportModelOperationsMixin("attendance.ManualCampusOnlineEntry"), models.Model
+):
     """
     ## Fields
 
@@ -425,7 +432,10 @@ class ManualCampusOnlineEntry(ExportModelOperationsMixin("attendance.ManualCampu
         "CampusOnlineHolding", models.CASCADE, related_name="manual_entries"
     )
     student = models.ForeignKey(
-        "campusonline.Student", models.DO_NOTHING, db_constraint=False, related_name="manual_attendance"
+        "campusonline.Student",
+        models.DO_NOTHING,
+        db_constraint=False,
+        related_name="manual_attendance",
     )
     room = models.ForeignKey(
         "campusonline.Room", models.DO_NOTHING, db_constraint=False, related_name="+"
@@ -526,7 +536,9 @@ class Statistics(models.Model):
         return f"{s.name} ({s.terminals.count()} Terminals / {s.active})"
 
 
-class StatisticsEntry(ExportModelOperationsMixin("attendance.StatisticsEntry"), models.Model):
+class StatisticsEntry(
+    ExportModelOperationsMixin("attendance.StatisticsEntry"), models.Model
+):
     statistics = models.ForeignKey("Statistics", models.CASCADE, related_name="entries")
     incoming = models.ForeignKey("Entry", models.CASCADE, related_name="+")
     outgoing = models.ForeignKey(

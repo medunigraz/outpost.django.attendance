@@ -10,18 +10,47 @@ import outpost.django.base.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('attendance', '0028_auto_20210803_0913'),
+        ("attendance", "0028_auto_20210803_0913"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='manualcampusonlineentry',
-            name='student',
-            field=models.ForeignKey(db_constraint=False, on_delete=django.db.models.deletion.DO_NOTHING, related_name='manual_attendance', to='campusonline.Student'),
+            model_name="manualcampusonlineentry",
+            name="student",
+            field=models.ForeignKey(
+                db_constraint=False,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="manual_attendance",
+                to="campusonline.Student",
+            ),
         ),
         migrations.AlterField(
-            model_name='terminal',
-            name='behaviour',
-            field=outpost.django.base.fields.ChoiceArrayField(base_field=models.CharField(choices=[('outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour', 'CAMPUSonline'), ('outpost.django.attendance.plugins.DebugTerminalBehaviour', 'Debugger'), ('outpost.django.attendance.plugins.ImmunizationTerminalBehaviour', 'Immunisierung'), ('outpost.django.attendance.plugins.StatisticsTerminalBehaviour', 'Statistiken')], max_length=256), default=list, size=None),
+            model_name="terminal",
+            name="behaviour",
+            field=outpost.django.base.fields.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        (
+                            "outpost.django.attendance.plugins.CampusOnlineTerminalBehaviour",
+                            "CAMPUSonline",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.DebugTerminalBehaviour",
+                            "Debugger",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.ImmunizationTerminalBehaviour",
+                            "Immunisierung",
+                        ),
+                        (
+                            "outpost.django.attendance.plugins.StatisticsTerminalBehaviour",
+                            "Statistiken",
+                        ),
+                    ],
+                    max_length=256,
+                ),
+                default=list,
+                size=None,
+            ),
         ),
     ]

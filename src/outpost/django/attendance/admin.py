@@ -20,7 +20,9 @@ class TerminalAdmin(admin.ModelAdmin):
     readonly_fields = ("online", "screen", "config")
 
     def list_rooms(self, obj):
-        rooms = "".join([f"<li>{r.name_full} ({r.title})</li>" for r in obj.rooms.all()])
+        rooms = "".join(
+            [f"<li>{r.name_full} ({r.title})</li>" for r in obj.rooms.all()]
+        )
         return mark_safe(f"<ul>{rooms}</ul>")
 
 

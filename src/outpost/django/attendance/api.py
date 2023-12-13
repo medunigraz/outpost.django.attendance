@@ -121,9 +121,7 @@ class ManualCampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
 class RoomStateViewSet(FlexFieldsMixin, viewsets.ReadOnlyModelViewSet):
     queryset = co.Room.objects.exclude(terminals=None)
     serializer_class = serializers.RoomStateSerializer
-    permission_classes = (
-        permissions.IsAuthenticated,
-    )
+    permission_classes = (permissions.IsAuthenticated,)
     permit_list_expands = ("students",)
 
 

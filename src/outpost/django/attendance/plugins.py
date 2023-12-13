@@ -34,13 +34,11 @@ class TerminalBehaviour(object):
 
     @hookspec
     def preflight(self, terminal, student) -> List[dict]:
-        """
-        """
+        """"""
 
     @hookspec
     def clock(self, entry, payload) -> List[str]:
-        """
-        """
+        """"""
 
 
 class DebugTerminalBehaviour(TerminalBehaviourPlugin):
@@ -151,7 +149,9 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
                     # the first holding from all parallel ones.
                     coe.assign(holdings.first())
                 msg = _(
-                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}".format(coe=coe)
+                    f"Welcome {coe.incoming.student.display} to {coe.holding.course_group_term.coursegroup}".format(
+                        coe=coe
+                    )
                 )
             else:
                 logger.debug(f"No active holding found for {coe}")

@@ -60,6 +60,7 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
      * `entries`
 
     """
+
     accredited = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     expandable_fields = {
@@ -94,7 +95,14 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
             "manual_entries",
             "accredited",
         )
-        read_only_fields = ("id", "state", "initiated", "finished", "entries", "accredited")
+        read_only_fields = (
+            "id",
+            "state",
+            "initiated",
+            "finished",
+            "entries",
+            "accredited",
+        )
 
     def save(self):
         request = self.context.get("request", None)
@@ -213,9 +221,7 @@ class RoomStateCampusOnlineEntrySerializer(CampusOnlineEntrySerializer):
         super().__init__(*args, **kwargs)
 
     class Meta(CampusOnlineEntrySerializer.Meta):
-        fields = CampusOnlineEntrySerializer.Meta.fields + (
-            "onsite",
-        )
+        fields = CampusOnlineEntrySerializer.Meta.fields + ("onsite",)
 
     def get_onsite(self, obj):
         if not self.hybrid:
@@ -223,9 +229,10 @@ class RoomStateCampusOnlineEntrySerializer(CampusOnlineEntrySerializer):
         return RoomAllocation.objects.filter(
             student=obj.incoming.student,
             room=obj.room,
-            start__lte=timezone.now() + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
+            start__lte=timezone.now()
+            + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
             end__gte=timezone.now(),
-            onsite=True
+            onsite=True,
         ).exists()
 
 
@@ -237,9 +244,7 @@ class RoomStateManualCampusOnlineEntrySerializer(ManualCampusOnlineEntrySerializ
         super().__init__(*args, **kwargs)
 
     class Meta(ManualCampusOnlineEntrySerializer.Meta):
-        fields = ManualCampusOnlineEntrySerializer.Meta.fields + (
-            "onsite",
-        )
+        fields = ManualCampusOnlineEntrySerializer.Meta.fields + ("onsite",)
 
     def get_onsite(self, obj):
         if not self.hybrid:
@@ -247,15 +252,16 @@ class RoomStateManualCampusOnlineEntrySerializer(ManualCampusOnlineEntrySerializ
         return RoomAllocation.objects.filter(
             student=obj.student,
             room=obj.room,
-            start__lte=timezone.now() + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
+            start__lte=timezone.now()
+            + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
             end__gte=timezone.now(),
-            onsite=True
+            onsite=True,
         ).exists()
 
 
 class RoomStateSerializer(serializers.ModelSerializer):
-    """
-    """
+    """"""
+
     hybrid = serializers.SerializerMethodField()
     cards = serializers.SerializerMethodField()
     manuals = serializers.SerializerMethodField()
@@ -272,34 +278,35 @@ class RoomStateSerializer(serializers.ModelSerializer):
 
     def get_hybrid(self, obj):
         return obj.roomallocation_set.filter(
-            start__lte=timezone.now() + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
-            end__gte=timezone.now()
+            start__lte=timezone.now()
+            + settings.ATTENDANCE_CAMPUSONLINE_ROOMALLOCATION_BUFFER_START,
+            end__gte=timezone.now(),
         ).exists()
 
     def get_cards(self, obj):
-        coes = models.CampusOnlineEntry.objects.filter(
-            room=obj,
-            state__in=("created", "assigned"),
-            incoming__created__date=timezone.now().date()
-        ).distinct().select_related("incoming__student")
+        coes = (
+            models.CampusOnlineEntry.objects.filter(
+                room=obj,
+                state__in=("created", "assigned"),
+                incoming__created__date=timezone.now().date(),
+            )
+            .distinct()
+            .select_related("incoming__student")
+        )
         return RoomStateCampusOnlineEntrySerializer(
-            coes,
-            many=True,
-            expand=["student"],
-            hybrid=self.get_hybrid(obj)
+            coes, many=True, expand=["student"], hybrid=self.get_hybrid(obj)
         ).data
 
     def get_manuals(self, obj):
-        mcoes = models.ManualCampusOnlineEntry.objects.filter(
-            room=obj,
-            state="assigned",
-            assigned__date=timezone.now().date()
-        ).distinct().select_related("student")
+        mcoes = (
+            models.ManualCampusOnlineEntry.objects.filter(
+                room=obj, state="assigned", assigned__date=timezone.now().date()
+            )
+            .distinct()
+            .select_related("student")
+        )
         return RoomStateManualCampusOnlineEntrySerializer(
-            mcoes,
-            many=True,
-            expand=["student"],
-            hybrid=self.get_hybrid(obj)
+            mcoes, many=True, expand=["student"], hybrid=self.get_hybrid(obj)
         ).data
 
 

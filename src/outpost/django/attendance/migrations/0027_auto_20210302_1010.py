@@ -11,13 +11,21 @@ import outpost.django.base.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('attendance', '0026_auto_20210201_1534'),
+        ("attendance", "0026_auto_20210201_1534"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='terminal',
-            name='screen',
-            field=models.ImageField(null=True, upload_to=outpost.django.base.utils.Uuid4Upload, validators=[outpost.django.base.validators.FileValidator(mimetypes=['image/png'])]),
+            model_name="terminal",
+            name="screen",
+            field=models.ImageField(
+                null=True,
+                upload_to=outpost.django.base.utils.Uuid4Upload,
+                validators=[
+                    outpost.django.base.validators.FileValidator(
+                        mimetypes=["image/png"]
+                    )
+                ],
+            ),
         ),
     ]

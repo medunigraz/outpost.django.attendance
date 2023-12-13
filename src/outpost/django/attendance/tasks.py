@@ -15,8 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 class CampusOnlineHoldingTasks:
-
-    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineHolding:email_unaccredited")
+    @shared_task(
+        bind=True,
+        ignore_result=True,
+        name=f"{__name__}.CampusOnlineHolding:email_unaccredited",
+    )
     def email_unaccredited(task, pk_coh, pks_coe, pks_mcoe):
         from .models import (
             CampusOnlineHolding,
@@ -51,7 +54,9 @@ class CampusOnlineHoldingTasks:
         msg.content_subtype = "html"
         msg.send()
 
-    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineHolding:cleanup")
+    @shared_task(
+        bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineHolding:cleanup"
+    )
     def cleanup(task):
         """
         Clean up holdings that were not ended manually.
@@ -70,7 +75,6 @@ class CampusOnlineHoldingTasks:
 
 
 class EntryTasks:
-
     @shared_task(bind=True, ignore_result=True, name=f"{__name__}.Entry:cleanup")
     def cleanup(task):
         from outpost.django.campusonline.models import Student
@@ -89,8 +93,9 @@ class EntryTasks:
 
 
 class CampusOnlineEntryTasks:
-
-    @shared_task(bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineEntry:cleanup")
+    @shared_task(
+        bind=True, ignore_result=True, name=f"{__name__}.CampusOnlineEntry:cleanup"
+    )
     def cleanup(task):
         """
         End all CO entries that were registered for a room but where not assigned
