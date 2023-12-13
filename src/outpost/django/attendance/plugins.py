@@ -8,6 +8,8 @@ from django.utils.translation import gettext as _
 from outpost.django.base.plugins import Plugin
 from rest_framework.exceptions import NotFound
 
+from .conf import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -156,7 +158,7 @@ class CampusOnlineTerminalBehaviour(TerminalBehaviourPlugin):
             else:
                 logger.debug(f"No active holding found for {coe}")
                 msg = _("Welcome {coe.incoming.student.display}").format(coe=coe)
-            if not entry.student.immunized:
+            if settings.ATTENDANCE_CHECK_IMMUNIZATION and not entry.student.immunized:
                 msg = _("Please reach out to your instructor")
         coe.save()
         return msg

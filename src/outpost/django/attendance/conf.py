@@ -13,6 +13,7 @@ class AttendanceAppConf(AppConf):
     STUDENT_MATRICULATION_MASK = "*"
     STUDENT_MATRICULATION_UNMASKED = 3
     CAMPUSONLINE_ROOMALLOCATION_BUFFER_START = timedelta(minutes=15)
+    CHECK_IMMUNIZATION = False
 
     class Meta:
         prefix = "attendance"
