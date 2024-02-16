@@ -69,7 +69,12 @@ class CampusOnlineHoldingTasks:
         now = timezone.now()
         for h in CampusOnlineHolding.objects.filter(state="running"):
             period = h.course_group_term.end - h.course_group_term.start
-            if h.initiated + period + settings.ATTENDANCE_HOLDING_OVERDRAFT < now:
+            if (
+                h.initiated
+                + period
+                + settings.ATTENDANCE_CAMPUSONLINE_HOLDING_OVERDRAFT
+                < now
+            ):
                 h.end(finished=h.initiated + period)
                 h.save()
 
