@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 from itertools import chain
 
 import django
@@ -10,7 +9,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 from django_prometheus.models import ExportModelOperationsMixin
-from model_utils.models import TimeStampedModel
 from outpost.django.base.decorators import signal_connect
 from outpost.django.base.fields import ChoiceArrayField
 from outpost.django.base.models import NetworkedDeviceMixin, RelatedManager
