@@ -2,7 +2,7 @@ import logging
 from itertools import chain
 
 import django
-from django.contrib.postgres.fields import DateTimeRangeField, JSONField
+from django.contrib.postgres.fields import DateTimeRangeField
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -28,7 +28,7 @@ class Terminal(NetworkedDeviceMixin, models.Model):
     rooms = models.ManyToManyField(
         "campusonline.Room", db_constraint=False, related_name="terminals"
     )
-    config = JSONField(null=True)
+    config = models.JSONField(null=True)
     behaviour = ChoiceArrayField(
         base_field=models.CharField(
             max_length=256,
