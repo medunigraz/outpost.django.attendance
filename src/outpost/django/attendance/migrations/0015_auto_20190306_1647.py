@@ -9,7 +9,6 @@ import outpost.django.base.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("campusonline", "0044_auto_20190225_1708"),
         ("attendance", "0014_terminal_room_to_entry"),
     ]
 

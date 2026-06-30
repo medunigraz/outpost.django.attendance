@@ -10,7 +10,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("campusonline", "0009_course_coursegroup_coursegroupterm_student"),
+        ("campusonline", "0001_initial"),
         ("attendance", "0001_initial"),
     ]
 

@@ -10,7 +10,6 @@ import django_fsm
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("campusonline", "0053_external"),
         ("attendance", "0021_auto_20200915_1006"),
     ]
 

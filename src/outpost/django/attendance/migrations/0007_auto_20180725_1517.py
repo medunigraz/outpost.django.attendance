@@ -13,7 +13,6 @@ from ...base.fields import ChoiceArrayField
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("campusonline", "0014_stud_lv_anw"),
         ("attendance", "0006_terminal_behaviour"),
     ]
 
