@@ -30,7 +30,7 @@ class CampusOnlineHoldingViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     queryset = models.CampusOnlineHolding.objects.all()
     serializer_class = serializers.CampusOnlineHoldingSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = filters.CampusOnlineHoldingFilter
+    filterset_class = filters.CampusOnlineHoldingFilter
     ordering_fields = ("initiated",)
     permission_classes = (permissions.IsAuthenticated,)
     permit_list_expands = (
@@ -66,7 +66,7 @@ class CampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     queryset = models.CampusOnlineEntry.objects.all()
     serializer_class = serializers.CampusOnlineEntrySerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = filters.CampusOnlineEntryFilter
+    filterset_class = filters.CampusOnlineEntryFilter
     ordering_fields = ("initiated",)
     permission_classes = (
         permissions.IsAuthenticated,
@@ -94,7 +94,7 @@ class ManualCampusOnlineEntryViewSet(FlexFieldsMixin, viewsets.ModelViewSet):
     queryset = models.ManualCampusOnlineEntry.objects.all()
     serializer_class = serializers.ManualCampusOnlineEntrySerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = filters.ManualCampusOnlineEntryFilter
+    filterset_class = filters.ManualCampusOnlineEntryFilter
     ordering_fields = ("assigned",)
     permission_classes = (
         permissions.IsAuthenticated,
