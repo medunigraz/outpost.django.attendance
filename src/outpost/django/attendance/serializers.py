@@ -30,7 +30,7 @@ class TerminalSerializer(FlexFieldsModelSerializer):
     expandable_fields = {
         "rooms": (
             "outpost.django.campusonline.serializers.RoomSerializer",
-            {"source": "rooms", "many": True},
+            {"many": True},
         )
     }
 
@@ -66,19 +66,19 @@ class CampusOnlineHoldingSerializer(FlexFieldsModelSerializer):
     expandable_fields = {
         "course_group_term": (
             "outpost.django.campusonline.serializers.CourseGroupTermSerializer",
-            {"source": "course_group_term", "read_only": True},
+            {"read_only": True},
         ),
         "entries": (
             f"{__package__}.CampusOnlineEntrySerializer",
-            {"source": "entries", "read_only": True, "many": True},
+            {"read_only": True, "many": True},
         ),
         "manual_entries": (
             f"{__package__}.ManualCampusOnlineEntrySerializer",
-            {"source": "manual_entries", "read_only": True, "many": True},
+            {"read_only": True, "many": True},
         ),
         "accredited": (
             f"{__package__}.MaskedStudentSerializer",
-            {"source": "accredited", "read_only": True, "many": True},
+            {"read_only": True, "many": True},
         ),
     }
 
@@ -145,11 +145,11 @@ class CampusOnlineEntrySerializer(FlexFieldsModelSerializer):
     expandable_fields = {
         "holding": (
             f"{__package__}.CampusOnlineHoldingSerializer",
-            {"source": "holding", "read_only": True},
+            {"read_only": True},
         ),
         "student": (
             "outpost.django.campusonline.serializers.AuthenticatedStudentSerializer",
-            {"source": "incoming.student", "read_only": True},
+            {"read_only": True},
         ),
     }
 
@@ -186,15 +186,15 @@ class ManualCampusOnlineEntrySerializer(FlexFieldsModelSerializer):
     expandable_fields = {
         "holding": (
             f"{__package__}.CampusOnlineHoldingSerializer",
-            {"source": "holding", "read_only": True},
+            {"read_only": True},
         ),
         "student": (
             "outpost.django.campusonline.serializers.AuthenticatedStudentSerializer",
-            {"source": "student", "read_only": True},
+            {"read_only": True},
         ),
         "room": (
             "outpost.django.campusonline.serializers.RoomSerializer",
-            {"source": "room", "read_only": True},
+            {"read_only": True},
         ),
     }
 
